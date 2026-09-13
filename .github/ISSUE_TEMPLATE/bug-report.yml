@@ -1,0 +1,75 @@
+name: 버그 리포트
+description: Memory Replay에서 발생한 버그를 제보합니다.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        재현 가능한 버그만 남겨 주세요. 로그를 함께 적으면 대응이 빠릅니다.
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: 상황
+      options:
+        - 면접 복기
+        - 분실물 찾기
+        - 미팅 복기
+        - 공통(상황 무관)
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 발생한 단계
+      options:
+        - 빠른 메모
+        - 후보 추출
+        - O/X 검증
+        - Step 1 객관 정보
+        - Step 2 회상
+        - 타임라인 검토
+        - 결과 생성
+        - 다운로드/삭제
+        - 기타
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 문제 요약
+      placeholder: "무엇이, 어떤 조건에서, 어떻게 잘못되는지 한 줄로 적어 주세요."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 단계
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 동작
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 영향
+      placeholder: "이 문제가 어떤 사용자에게 어떤 영향을 주는지 적어 주세요."
+  - type: textarea
+    id: notes
+    attributes:
+      label: 참고 자료
+      placeholder: 스크린샷, 콘솔 로그, 네트워크 응답 등

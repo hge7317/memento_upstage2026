@@ -1,0 +1,11 @@
+Node를 위한 .gitignore
+node_modules
+.env
+.env.*
+!.env.example
+.next
+out
+dist
+*.tsbuildinfo
+.DS_Store
+*/.DS_Store
