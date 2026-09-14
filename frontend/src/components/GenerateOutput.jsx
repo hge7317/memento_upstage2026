@@ -1,520 +1,482 @@
-import { useState, useMemo, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 /**
- * GenerateOutput - 면접 복기 결과 Markdown을 생성하고 최종 결과 객체를 반환한다.
+ * GenerateOutput - TIMELINE_REVIEW 확정 결과를 Markdown 10절 구조로 조합해 표시한다.
  *
  * 참조:
- *  - PRD §5.3 (GENERATE_OUTPUT 상태 정의)
- *  - PRD §9 (결과 문서 구성: 10절 구조)
- *  - PRD §9.8 (인출 카드 5~8장, 데이터 부족 시 억지 생성 금지)
- *  - PRD §13 (봉인 대상: 면접 준비자료는 대조 동의 시에만 개방, 대조 결과는 별도 섹션)
- *  - docs/assets/interview-result-template.md (10절 구조 템플릿)
- *  - docs/references/output-contract.md §최종 결과 객체 (resultDocument + qualityLog)
- *  - docs/references/schedule_calc.md (재확인 일정 계산)
- *  - scripts/schedule_calc.py (D+1/D+3/D+7/최종 연습 계산)
+ *  - PRD §16 (GENERATE_OUTPUT), §12 (면접 결과 생성)
+ *  - PRD §13 (출력 계약 — resultDocument / qualityLog)
+ *  - output-contract.md §GENERATE_OUTPUT / §최종 결과 객체 / §파일명
+ *  - assets/interview-result-template.md (10절 템플릿)
+ *  - docs/references/guardrails.md §8 (확신도 표시)
+ *  - docs/references/scenarios/interview.md §결과 필수 섹션
  *
- * 완료 조건:
- *  - 결과 Markdown 상단에 고지 문구 포함
- *  - 빈 값을 [사용자 기입]/[확인 필요]/기억나지 않음으로 처리, AI 임의 채움 없음
- *  - 인출 카드 5~8장, 데이터 부족하면 억지로 채우지 않음
- *  - qualityLog에 12개 필드 모두 있음
- *  - resultDocument 객체(title/scenario/notice/markdown/suggestedFileName) + qualityLog 반환
- *  - suggestedFileName 형식: Memory-Replay_YYYY-MM-DD_면접_{이름}.md (경로 문자 제거)
+ * 완료 기준(체크 가능):
+ *  - candidateItems + interviewInfo + 검증 결과 기반 Markdown 생성
+ *  - 10절 구조 충족 (기본 정보/빠른 메모/타임라인/순서 미상 및 빈 구간/
+ *    평가·감정·추측/AAR/준비자료 대조/인출 카드/재확인 일정/품질 로그)
+ *  - 고지 문구 포함 ("사용자의 기억을 구조화한 기록이며 녹취나 객관적 사실 확인 결과가 아닙니다")
+ *  - 빈 값 처리 3종 포함 ([사용자 기입], [확인 필요], [기억나지 않음])
+ *  - suggestedFileName 형식 준수 (Memory-Replay_YYYY-MM-DD_면접_{이름}.md)
+ *  - retrievalCards JSON 구조 포함 (메타 태그로 직렬화하여 서비스 카드 UI에서 읽도록 보존)
+ *  - sensitiveNameHidden prop 처리 (true면 회사명/이름 등 민감 정보 비표시)
+ *  - 빌드 성공
  *
- * 안전 검사 (guardrails.md §6~7):
- *  - GENERATE_OUTPUT 단계에서는 질문 생성이 없으므로 multipleRecallQuestions, injectionCheckPassed는
- *    질문 시점 검사로 적절하지 않음. 결과 문서 자체의 안전 검사를 수행한다.
- *
- * frontendChecks는 이 컴포넌트에서 확인 가능한 범위만 기록한다.
- * injectionCheckPassed는 백엔드/스킬 최종 결정사항이므로 여기서는 확정하지 않는다 (null).
+ * 범위 바깥:
+ *  - PDF 생성 (W-18 — 서비스 책임, PDF_SERVICE_RESPONSIBILITY.md 참조)
+ *  - Solar 연동 (이미 완료)
+ *  - 컴포넌트 내부 회상 로직 변경
  */
 
-// --- 일정 계산 헬퍼 (scripts/schedule_calc.py 로직 프론트엔드 재현) ---
-// 계산 실패 시 수기 대체 경로: scheduleCalc()가 null을 반환하면 호출 측에서 fallback 사용
-function scheduleCalc(calendarDate) {
-  if (!calendarDate || !/^\d{4}-\d{2}-\d{2}$/.test(calendarDate)) {
-    // 계산 실패 → 수기 대체 경로: 빈 객체 반환, 호출 측에서 처리
-    return null;
+function confidenceLabel(conf) {
+  if (conf === "HIGH") return "◎ 높음";
+  if (conf === "MEDIUM") return "△ 보통";
+  if (conf === "UNKNOWN") return "? 모름";
+  return conf ?? "미정";
+}
+
+function sequenceStatusLabel(status) {
+  if (status === "KNOWN") return "확인";
+  if (status === "APPROXIMATE") return "대략";
+  if (status === "UNKNOWN") return "미상";
+  return status ?? "미상";
+}
+
+/** React key로 사용할 안전 식별자. id가 없으면 claim 기반 해시 fallback. */
+function itemKey(item) {
+  if (item && typeof item.id === "string" && item.id) return item.id;
+  const claim = item?.claim ?? "";
+  let hash = 0;
+  for (let i = 0; i < claim.length; i++) {
+    hash = (hash * 31 + claim.charCodeAt(i)) | 0;
   }
-  const today = new Date(calendarDate + "T00:00:00+09:00");
-  const addDays = (date, days) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result.toISOString().slice(0, 10);
+  return `fallback-${hash}-${claim.slice(0, 20)}`;
+}
+
+/** 민감 정보 비표시 처리 */
+function sanitizeForName(value) {
+  if (!value) return "";
+  // 경로 문자 제거 (output-contract.md 파일명 규칙)
+  return value.replace(/[/\\:*?"<>|]/g, "").trim();
+}
+
+/**
+ * 면접 템플릿 8절(인출 카드)의 카드 배열.
+ * 데이터는 timeline에서 충분한 항목이 있을 때만 생성한다.
+ * 카드 앞면·뒷면·근거는 markdown 안에 두되, JSON용 구조로도 남겨 서비스 카드 UI에서 읽을 수 있게 한다.
+ */
+function buildRetrievalCards(timeline) {
+  const cards = [];
+  // 확정된 순서로 정렬된 활성 항목만 사용
+  const ordered = timeline
+    .filter((t) => t != null && t.source != null)
+    .slice(0, 8);
+
+  for (let i = 0; i < ordered.length; i++) {
+    const item = ordered[i];
+    const seq = item.sequence != null ? `#${item.sequence}` : "순서 미상";
+    cards.push({
+      cardNumber: i + 1,
+      front: `면접 중 ${seq} 장면/질문에서 기억나는 내용은?`,
+      back: item.claim ?? "[기억나지 않음]",
+      evidence: `${seq} (${item.source}${item.sourceQuote ? `, 근거: "${item.sourceQuote}"` : ""})`,
+    });
+  }
+
+  // 데이터가 1개 미만이면 빈 배열로 두고, 화면에는 "데이터 부족" 메시지를 표시한다.
+  return cards;
+}
+
+/**
+ * 제안된 파일명.
+ * 형식: Memory-Replay_YYYY-MM-DD_면접_{이름}.md
+ * sensitiveNameHidden이 true면 이름 부분에 민감 정보가 들어가지 않도록 한다.
+ */
+function buildSuggestedFileName(interviewInfo, sensitiveNameHidden) {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const name = sanitizeForName(interviewInfo?.companyName ?? "");
+  const safeName = sensitiveNameHidden && name ? "[회사명 비공개]" : name;
+  const base = safeName ? `면접_${safeName}` : "면접";
+  return `Memory-Replay_${today}_${base}.md`;
+}
+
+/**
+ * Markdown 본문 생성.
+ * 고지 문구 → 10절 순서.
+ */
+function buildMarkdown({
+  interviewInfo,
+  quickMemoText,
+  timeline,
+  evaluations,
+  openGaps,
+  comparison,
+  retrievalCards,
+  qualityLog,
+  sensitiveNameHidden,
+}) {
+  const lines = [];
+
+  // 고지 문구 (PRD §12: 모든 결과 상단에 포함)
+  lines.push(
+    "# 면접 복기",
+    "",
+    "> 이 문서는 사용자의 기억을 구조화한 기록이며 녹취나 객관적 사실 확인 결과가 아닙니다. 확신도는 사용자의 주관적 표시입니다.",
+    ""
+  );
+
+  // 1. 기본 정보
+  lines.push("## 1. 기본 정보", "");
+  const companyName = sensitiveNameHidden ? "[회사명 비공개]" : (interviewInfo?.companyName ?? "[사용자 기입]");
+  const roleOrDepartment = interviewInfo?.roleOrDepartment ?? "[사용자 기입]";
+  const eventDateTime = interviewInfo?.eventDateTime ?? "[확인 필요]";
+  const interviewMode = interviewInfo?.interviewMode ?? "[사용자 기입]";
+  const interviewStage = interviewInfo?.interviewStage ?? "[사용자 기입]";
+  const interviewerCount = interviewInfo?.interviewerCount ?? "[사용자 기입]";
+  const recallStartedAt = new Date().toISOString().replace("T", " ").slice(0, 19);
+  lines.push(
+    "| 항목 | 내용 |",
+    "|---|---|",
+    `| 회사 | ${companyName} |`,
+    `| 직무·부서 | ${roleOrDepartment} |`,
+    `| 일시 | ${eventDateTime} |`,
+    `| 방식·단계 | ${interviewMode} / ${interviewStage} |`,
+    `| 면접관 수 | ${interviewerCount} |`,
+    `| 복기 시점 | ${recallStartedAt} |`,
+    ""
+  );
+
+  // 2. 빠른 메모
+  lines.push("## 2. 빠른 메모", "");
+  if (quickMemoText && quickMemoText.trim()) {
+    lines.push(quickMemoText, "");
+  } else {
+    lines.push("[기억나지 않음]", "");
+  }
+
+  // 3. 질문·답변 타임라인
+  lines.push("## 3. 질문·답변 타임라인", "");
+  lines.push(
+    "| # | 기억나는 질문·장면 | 사용자의 답변·행동 | 관찰된 반응 | 확신도 | 출처 |",
+    "|---|---|---|---|---|---|"
+  );
+  if (timeline && timeline.length > 0) {
+    for (const item of timeline) {
+      const seq = item.sequence != null ? String(item.sequence) : "순서 미상";
+      const claim = item.claim ?? "[기억나지 않음]";
+      const response = item.userResponse ?? "[사용자 기입]";
+      const observed = item.observedResponse ?? "[사용자 기입]";
+      const conf = confidenceLabel(item.confidence);
+      const source = item.source ?? "UNKNOWN";
+      lines.push(`| ${seq} | ${claim} | ${response} | ${observed} | ${conf} | ${source} |`);
+    }
+  } else {
+    lines.push("| 순서 미상 | [기억나지 않음] | [사용자 기입] | [사용자 기입] | ? 모름 | UNKNOWN |");
+  }
+  lines.push(
+    "",
+    "순서를 모르는 항목은 임의로 배치하지 말고 `순서 미상`에 둔다.",
+    ""
+  );
+
+  // 4. 순서 미상·비어 있는 구간
+  lines.push("## 4. 순서 미상·비어 있는 구간", "");
+  if (openGaps && openGaps.length > 0) {
+    for (const g of openGaps) {
+      const claim = g.claim ?? "[기억나지 않음]";
+      const status = g.sequenceStatus != null ? sequenceStatusLabel(g.sequenceStatus) : "미상";
+      lines.push(`- ${claim} (${status})`);
+    }
+  } else {
+    lines.push("- [기억나지 않음]");
+  }
+  lines.push("");
+
+  // 5. 평가·감정·추측
+  lines.push("## 5. 평가·감정·추측", "");
+  if (evaluations && evaluations.length > 0) {
+    for (const e of evaluations) {
+      const claim = e.claim ?? "[기억나지 않음]";
+      const conf = confidenceLabel(e.confidence);
+      const source = e.source ?? "UNKNOWN";
+      lines.push(`- ${claim} (확신도: ${conf}, 출처: ${source})`);
+    }
+  } else {
+    lines.push("- [기억나지 않음]");
+  }
+  lines.push("");
+
+  // 6. 사후 검토(AAR)
+  lines.push("## 6. 사후 검토(AAR)", "");
+  const expectation = "[사용자 기입]";
+  lines.push("### 기대", "");
+  lines.push(expectation, "");
+  lines.push("### 실제", "");
+  if (timeline && timeline.length > 0) {
+    // 타임라인 번호를 인용한 관찰 내용 — 근거는 템플릿 지시(§6. 실제)에 따른다.
+    const cited = timeline
+      .filter((t) => t != null)
+      .map((t) => {
+        const seq = t.sequence != null ? `#${t.sequence}` : "[순서 미상]";
+        return `${seq}: ${t.claim ?? "[기억나지 않음]"}`;
+      })
+      .join("\n");
+    lines.push(cited || "[사용자 기입]");
+  } else {
+    lines.push("[사용자 기입]");
+  }
+  lines.push("");
+  lines.push("### 원인에 대한 사용자 해석", "");
+  lines.push("[사용자 기입]", "");
+  lines.push("");
+  lines.push("### 유지할 점", "");
+  lines.push("- [근거가 있을 때만 작성]", "");
+  lines.push("### 보완할 점", "");
+  lines.push("- [근거가 있을 때만 작성]", "");
+
+  // 7. 준비자료 대조
+  lines.push("");
+  lines.push("## 7. 준비자료 대조", "");
+  if (comparison) {
+    // 대조 결과는 TIMELINE_REVIEW 확정 + 대조 동의 후에만 포함된다.
+    if (Array.isArray(comparison?.preparedAndOccurred)) {
+      lines.push("- ✅ 준비했고 실제로 나왔다고 기억함: " + comparison.preparedAndOccurred.join(", "));
+    } else {
+      lines.push("- ✅ 준비했고 실제로 나왔다고 기억함: [사용자 기입]");
+    }
+    if (Array.isArray(comparison?.occurredNotPrepared)) {
+      lines.push("- ⬜ 나왔지만 준비 기록에 없음: " + comparison.occurredNotPrepared.join(", "));
+    } else {
+      lines.push("- ⬜ 나왔지만 준비 기록에 없음: [사용자 기입]");
+    }
+    if (Array.isArray(comparison?.preparedNotRecalled)) {
+      lines.push("- ○ 준비했지만 실제로 나왔다는 기억 없음: " + comparison.preparedNotRecalled.join(", "));
+    } else {
+      lines.push("- ○ 준비했지만 실제로 나왔다는 기억 없음: [사용자 기입]");
+    }
+  } else {
+    lines.push("{봉인 해제 동의와 자료가 있을 때만 포함 — 현재 대조 미진행}", "");
+  }
+
+  // 8. 다음 연습용 인출 카드
+  lines.push("");
+  lines.push("## 8. 다음 연습용 인출 카드", "");
+  if (retrievalCards && retrievalCards.length > 0) {
+    lines.push("데이터가 충분할 때만 5~8장 작성한다. 부족하면 억지로 채우지 않는다.", "");
+    for (const card of retrievalCards) {
+      lines.push(`### 카드 ${card.cardNumber}`, "");
+      lines.push(`- 앞면: ${card.front}`, "");
+      lines.push(`- 뒷면: ${card.back}`, "");
+      lines.push(`- 근거: ${card.evidence}`, "");
+      lines.push("");
+    }
+  } else {
+    lines.push("데이터 부족 — 인출 카드 없음 (충분한 타임라인 항목이 없습니다).", "");
+  }
+
+  // 9. 재확인 일정
+  lines.push("");
+  lines.push("## 9. 재확인 일정", "");
+  lines.push(
+    "다음 실전 연습 일정은 `scripts/schedule_calc.py`의 계산값을 그대로 옮긴다. 계산 실패 시 수기로 대체한다.",
+    ""
+  );
+  // 수기 대체: 복기일 기준 D+1, D+3, D+7을 표시한다.
+  const today = new Date();
+  const addDays = (d, n) => {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r.toISOString().slice(0, 10);
   };
-  return {
-    d1: addDays(today, 1),
-    d3: addDays(today, 3),
-    d7: addDays(today, 7),
-    finalPractice: addDays(today, 14),
-  };
+  lines.push(`- D+1 추가 회상: ${addDays(today, 1)}`);
+  lines.push(`- D+3 카드 연습: ${addDays(today, 3)}`);
+  lines.push(`- D+7 카드 연습: ${addDays(today, 7)}`);
+  lines.push(`- 다음 실전 전 최종 연습: [확인 필요]`);
+  lines.push("");
+  lines.push(
+    "> 복기일보다 다음 실전이 앞이면 최종 연습일은 복기일 당일이 될 수 있다. 이는 복기 당일 연습 허용 여부에 대한 서비스 의도 확인 후 유지한다.",
+    ""
+  );
+
+  // 10. 회상 품질 로그
+  lines.push("## 10. 회상 품질 로그", "");
+  if (qualityLog) {
+    const {
+      candidateCount = 0,
+      confirmedCount = 0,
+      rejectedCount = 0,
+      editedCount = 0,
+      unknownCount = 0,
+      freeRecallCount = 0,
+      structuralCueCount = 0,
+      reverseRecallCount = 0,
+      evaluationCount = 0,
+      injectionViolationCount = 0,
+      rejectedPremiseUseCount = 0,
+      attachmentsUnsealedAt = null,
+    } = qualityLog;
+    lines.push(`- 후보 검증: O ${confirmedCount} / X ${rejectedCount} / 수정 ${editedCount} / ? ${unknownCount}`);
+    lines.push(
+      `- 기억 출처: 빠른 메모 ${candidateCount} / 자유 회상 ${freeRecallCount} / 구조 단서 ${structuralCueCount} / 역순 ${reverseRecallCount}`
+    );
+    lines.push(`- 평가·추측 분리: ${evaluationCount}개`);
+    lines.push(`- 질문 주입 위반: ${injectionViolationCount}개`);
+    lines.push(`- 거절 전제 사용: ${rejectedPremiseUseCount}개`);
+    if (attachmentsUnsealedAt) {
+      lines.push(`- 준비자료 봉인 해제: ${attachmentsUnsealedAt}`);
+    } else {
+      lines.push("- 준비자료 봉인 해제: 미사용 (대조 미동의)");
+    }
+  } else {
+    lines.push("- 후보 검증: [확인 필요]");
+    lines.push("- 기억 출처: [확인 필요]");
+    lines.push("- 평가·추측 분리: [확인 필요]");
+    lines.push("- 질문 주입 위반: [확인 필요]");
+    lines.push("- 거절 전제 사용: [확인 필요]");
+    lines.push("- 준비자료 봉인 해제: [확인 필요]");
+  }
+
+  return lines.join("\n");
 }
 
 export function GenerateOutput({
+  timelineData,
   interviewInfo = {},
   quickMemoText = "",
-  showQuickMemoOriginal = false,
-  timeline = [],
-  openGaps = [],
-  evaluations = [],
-  comparison = null,
   candidateItems = [],
   verifications = {},
   newMemoryItems = [],
-  qualityLogFromReview = null,
+  comparisonData = null,
+  suggestedFileName: propFileName,
+  onCopyMarkdown,
+  onDownloadMarkdown,
   onFinish,
-  refresherStartedAt = new Date().toISOString(),
-  calendarDate = new Date().toISOString().slice(0, 10),
+  sensitiveNameHidden = false,
 }) {
-  const [copied, setCopied] = useState(false);
+  // 타임라인 데이터 추출 (TIMELINE_REVIEW onConfirm 결과)
+  // GenerateOutput은 Markdown 조합만 담당하므로, 원본 항목을 그대로 사용하고
+  // 템플릿에서 필요한 필드는 렌더링 시점에 기본값으로 보완한다.
+  const timeline = timelineData?.timeline ?? [];
 
-  // 일정 계산 (계산 실패 시 빈 객체 → 수기 대체 경로)
-  const scheduleDates = useMemo(() => {
-    const calcResult = scheduleCalc(calendarDate);
-    if (calcResult) return calcResult;
-    // 수기 대체 경로: 계산 실패 시 빈 객체 반환, 호출 측에서 fallback
-    return {};
-  }, [calendarDate]);
+  const evaluations = timelineData?.evaluations ?? [];
+  const openGaps = timelineData?.openGaps ?? [];
+  const qualityLog = timelineData?.qualityLog ?? null;
 
-  const qualityLog = useMemo(() => {
-    if (qualityLogFromReview) return qualityLogFromReview;
+  // retrievalCards 생성
+  const retrievalCards = useMemo(() => buildRetrievalCards(timeline), [timeline]);
 
-    const counts = {};
-    Object.values(verifications).forEach(v => {
-      counts[v] = (counts[v] || 0) + 1;
-    });
+  // suggestedFileName: props로 받은 것이 있으면 우선 사용, 없으면 계산
+  const suggestedFileName = propFileName ?? buildSuggestedFileName(interviewInfo, sensitiveNameHidden);
 
-    return {
-      stage: "GENERATE_OUTPUT",
-      candidateCount: candidateItems.length,
-      confirmedCount: counts["CONFIRMED"] || 0,
-      rejectedCount: counts["REJECTED"] || 0,
-      editedCount: counts["EDITED"] || 0,
-      unknownCount: counts["UNKNOWN"] || 0,
-      freeRecallCount: newMemoryItems.filter(m => m.source === "FREE_RECALL").length,
-      structuralCueCount: newMemoryItems.filter(m => m.source === "STRUCTURAL_CUE").length,
-      reverseRecallCount: newMemoryItems.filter(m => m.source === "REVERSE_RECALL").length,
-      evaluationCount: evaluations.length,
-      injectionViolationCount: 0,
-      rejectedPremiseUseCount: 0,
-      attachmentsUnsealedAt: comparison !== null ? new Date().toISOString() : null,
-    };
-  }, [verifications, candidateItems, newMemoryItems, evaluations, comparison, qualityLogFromReview]);
-
-  const markdown = useMemo(() => {
-    const company = interviewInfo.companyName ?? "[사용자 기입]";
-    const role = interviewInfo.roleOrDepartment ?? "[사용자 기입]";
-    const eventDateTime = interviewInfo.eventDateTime ?? "[확인 필요]";
-    const mode = interviewInfo.interviewMode ?? "모름";
-    const stageStr = interviewInfo.interviewStage ?? "모름";
-    const interviewerCount = interviewInfo.interviewerCount ?? "[확인 필요]";
-    const eventName = interviewInfo.eventName ?? "[사용자 기입]";
-    const recallStartedAt = refresherStartedAt;
-
-    const quickMemoSection = showQuickMemoOriginal && quickMemoText
-      ? `## 2. 빠른 메모\n\n${quickMemoText}\n`
-      : "## 2. 빠른 메모\n\n[사용자 기입 — 빠른 메모 원문을 포함하려면 동의해 주세요.]\n";
-
-    let timelineRows = "";
-    if (timeline.length === 0) {
-      timelineRows = "| {번호} | 질문·답변·행동 | 확신도 | 출처 |\n|---|---|---|---|\n| — | 내용 없음 | — | — |\n";
-    } else {
-      timelineRows = "| # | 질문·답변·행동 | 확신도 | 출처 |\n|---|---|---|---|\n";
-      timeline.forEach((item) => {
-        const content = item.editedContent ?? item.claim ?? "[기억나지 않음]";
-        const confidence = item.confidence ?? "UNKNOWN";
-        const source = item.source ?? "UNKNOWN";
-        const seq = item.sequence != null ? `#${item.sequence}` : "순서 미상";
-        timelineRows += `| ${seq} | ${content} | ${confidence} | ${source} |\n`;
-      });
-    }
-
-    let gapsList = "";
-    if (openGaps.length === 0) {
-      gapsList = "- [확인 필요 — 비어 있는 구간이 없습니다.]\n";
-    } else {
-      gapsList = openGaps.map(g => {
-        const detail = g.claim ?? "[기억나지 않음]";
-        const status = g.sequenceStatus ?? "순서 미상";
-        return `- ${status}: ${detail}`;
-      }).join("\n");
-      if (!gapsList.endsWith("\n")) gapsList += "\n";
-    }
-
-    let evalList = "";
-    if (evaluations.length === 0) {
-      evalList = "- [사용자 기입 — 평가·감정·추측이 없습니다.]\n";
-    } else {
-      evalList = evaluations.map(e => {
-        const text = e.claim ?? "[기억나지 않음]";
-        const conf = e.confidence ?? "UNKNOWN";
-        return `- ${text} (확신도: ${conf})`;
-      }).join("\n");
-      if (!evalList.endsWith("\n")) evalList += "\n";
-    }
-
-    const aarExpectation = interviewInfo.aarExpectation ?? "[사용자 기입]";
-    const aarActual = interviewInfo.aarActual ?? "[사용자 기입 — 타임라인 번호 인용 관찰 내용]";
-    const aarInterpretation = interviewInfo.aarInterpretation ?? "[사용자 기입]";
-    const aarKeep = interviewInfo.aarKeep
-      ?? (timeline.length > 0 ? "[근거 기반 유지 항목 — 사용자 확인 필요]" : "[사용자 기입]");
-    const aarImprove = interviewInfo.aarImprove
-      ?? (timeline.length > 0 ? "[근거 기반 보완 항목 — 사용자 확인 필요]" : "[사용자 기입]");
-
-    let comparisonSection = "";
-    if (comparison) {
-      comparisonSection = "## 7. 준비자료 대조\n\n";
-      if (Array.isArray(comparison.items)) {
-        comparisonSection += comparison.items.map(item => {
-          if (item.status === "prepared_and_remembered") {
-            return `- ✅ 준비했고 실제로 나왔다고 기억함: ${item.detail}`;
-          }
-          if (item.status === "emerged_not_in_prep") {
-            return `- ⬜ 나왔지만 준비 기록에 없음: ${item.detail}`;
-          }
-          if (item.status === "prepared_not_remembered") {
-            return `- ○ 준비했지만 실제로 나왔다는 기억 없음: ${item.detail}`;
-          }
-          return `- ${item.detail}`;
-        }).join("\n");
-        if (!comparisonSection.endsWith("\n")) comparisonSection += "\n";
-      } else {
-        comparisonSection += "- 대조 결과: 준비자료 대조 결과가 준비되었습니다.\n\n";
-      }
-    } else if (comparison === null) {
-      comparisonSection = "## 7. 준비자료 대조\n\n[사용자 기입 — 대조 동의 전이거나 준비자료가 없습니다.]\n";
-    }
-
-    // 인출 카드: 데이터 충분할 때만 5~8장, 부족하면 억지로 채우지 않음
-    // 각 카드는 앞면(prompt), 뒷면(answer), 근거(timelineReference)로 구성
-    // markdown에도 있고, JSON으로 식별 가능한 구조로도 반환 가능 (W-17 요구사항)
-    let cardsSection = "";
-    const activeMemoriesForCards = timeline.filter(t =>
-      t.confidence === "HIGH" || t.confidence === "MEDIUM"
-    );
-    const cardCount = Math.min(activeMemoriesForCards.length, 8);
-    const cards = []; // JSON 식별용 카드 배열 (W-17)
-    if (cardCount >= 5) {
-      cardsSection = "## 8. 다음 연습용 인출 카드\n\n";
-      for (let i = 0; i < cardCount; i++) {
-        const item = activeMemoriesForCards[i];
-        const prompt = item.editedContent ?? item.claim ?? "[기억나지 않음]";
-        const answer = item.editedContent ?? item.claim ?? "[기억나지 않음]";
-        const sourceRef = item.sequence != null ? `타임라인 #${item.sequence}` : `출처: ${item.source}`;
-        cardsSection += `### 카드 ${i + 1}\n\n`;
-        cardsSection += `- 앞면: ${prompt}\n`;
-        cardsSection += `- 뒷면: ${answer}\n`;
-        cardsSection += `- 근거: ${sourceRef}\n\n`;
-        cards.push({
-          front: prompt,
-          back: answer,
-          sourceRef,
-          id: `card-${i + 1}`,
-        });
-      }
-    } else {
-      cardsSection = "## 8. 다음 연습용 인출 카드\n\n데이터가 충분하지 않아 인출 카드를 생성하지 않았습니다. 더 많은 정보를 추가하면 카드를 생성할 수 있습니다.\n";
-    }
-
-    const scheduleSection = `## 9. 재확인 일정\n\n`;
-    if (Object.keys(scheduleDates).length > 0) {
-      scheduleSection += `- D+1 추가 회상: ${scheduleDates.d1}\n`;
-      scheduleSection += `- D+3 카드 연습: ${scheduleDates.d3}\n`;
-      scheduleSection += `- D+7 카드 연습: ${scheduleDates.d7}\n`;
-      scheduleSection += `- 다음 실전 전 최종 연습: ${scheduleDates.finalPractice}\n\n`;
-    } else {
-      // 계산 실패 시 수기 대체 경로 (W-19)
-      // 호출 측(서비스)은 markdown을 그대로 반환하면 되고,
-      // 수기 입력이 필요한 경우 서비스 측에서 사용자에게 날짜 입력을 요청할 수 있다.
-      scheduleSection += `- [수기 입력 필요 — 일정 계산 실패]\n\n`;
-    }
-    scheduleSection += `> 복기일보다 다음 실전이 앞이면 최종 연습일은 복기일 당일이 될 수 있습니다. 이는 복기 당일 연습 허용 여부에 대한 서비스 의도 확인 후 유지합니다.\n`;
-
-    const qualityLogSection = `## 10. 회상 품질 로그\n\n`;
-    qualityLogSection += `- 후보 검증: O ${qualityLog.confirmedCount} / X ${qualityLog.rejectedCount} / 수정 ${qualityLog.editedCount} / ? ${qualityLog.unknownCount}\n`;
-    const quickMemoCount = candidateItems.length
-      - qualityLog.confirmedCount
-      - qualityLog.rejectedCount
-      - qualityLog.editedCount
-      - qualityLog.unknownCount;
-    qualityLogSection += `- 기억 출처: 빠른 메모 ${quickMemoCount} / 자유 회상 ${qualityLog.freeRecallCount} / 구조 단서 ${qualityLog.structuralCueCount} / 역순 ${qualityLog.reverseRecallCount}\n`;
-    qualityLogSection += `- 평가·추측 분리: ${qualityLog.evaluationCount}개\n`;
-    qualityLogSection += `- 질문 주입 위반: ${qualityLog.injectionViolationCount}개\n`;
-    qualityLogSection += `- 거절 전제 사용: ${qualityLog.rejectedPremiseUseCount}개\n`;
-    qualityLogSection += `- 준비자료 봉인 해제: ${qualityLog.attachmentsUnsealedAt ?? "미개봉"}\n`;
-
-    const notice = "이 문서는 사용자의 기억을 구조화한 기록이며 녹취나 객관적 사실 확인 결과가 아닙니다. 확신도는 사용자의 주관적 표시입니다.";
-
-    return [
-      `# 면접 복기 — ${eventName}`,
-      "",
-      `> ${notice}`,
-      "",
-      "## 1. 기본 정보",
-      "",
-      "| 항목 | 내용 |",
-      "|---|---|",
-      `| 회사 | ${company} |`,
-      `| 직무·부서 | ${role} |`,
-      `| 일시 | ${eventDateTime} |`,
-      `| 방식·단계 | ${mode} / ${stageStr} |`,
-      `| 면접관 수 | ${interviewerCount} |`,
-      `| 복기 시점 | ${recallStartedAt} |`,
-      "",
-      quickMemoSection,
-      "## 3. 질문·답변 타임라인",
-      "",
-      timelineRows,
-      "순서를 모르는 항목은 임의로 배치하지 말고 `순서 미상`에 둔다.\n",
-      "",
-      "## 4. 순서 미상·비어 있는 구간",
-      "",
-      gapsList,
-      "## 5. 평가·감정·추측",
-      "",
-      evalList,
-      "## 6. 사후 검토(AAR)",
-      "",
-      "### 기대",
-      "",
-      aarExpectation,
-      "",
-      "### 실제",
-      "",
-      aarActual,
-      "",
-      "### 원인에 대한 사용자 해석",
-      "",
-      aarInterpretation,
-      "",
-      "### 유지할 점",
-      "",
-      `- ${aarKeep}`,
-      "",
-      "### 보완할 점",
-      "",
-      `- ${aarImprove}`,
-      "",
-      comparisonSection,
-      cardsSection,
-      scheduleSection,
-      qualityLogSection,
-      ""
-    ].join("\n");
-  }, [interviewInfo, quickMemoText, showQuickMemoOriginal, timeline, openGaps, evaluations, comparison, candidateItems, qualityLog, scheduleDates, refresherStartedAt]);
-
-  const title = interviewInfo.eventName ?? "[사용자 기입] 면접 복기";
-
-  const rawSurname = interviewInfo.surname ?? "";
-  const rawGiven = interviewInfo.givenName ?? "";
-  const sensitiveNameHidden = interviewInfo.sensitiveNameHidden === true;
-  const sanitizedSurname = sensitiveNameHidden ? "" : rawSurname.replace(/[\\/:*?"<>|]/g, "");
-  const sanitizedGiven = sensitiveNameHidden ? "" : rawGiven.replace(/[\\/:*?"<>|]/g, "");
-  const suggestedFileName = `Memory-Replay_${calendarDate}_면접_${sanitizedSurname}${sanitizedGiven}.md`;
-
-  // W-17: 인출 카드 JSON 식별 가능 구조 (markdown에도 있고 JSON으로도 식별 가능)
-  const retrievalCards = useMemo(() => {
-    const activeMemoriesForCards = timeline.filter(t =>
-      t.confidence === "HIGH" || t.confidence === "MEDIUM"
-    );
-    const cardCount = Math.min(activeMemoriesForCards.length, 8);
-    if (cardCount >= 5) {
-      return activeMemoriesForCards.slice(0, cardCount).map((item, i) => ({
-        id: `card-${i + 1}`,
-        front: item.editedContent ?? item.claim ?? "[기억나지 않음]",
-        back: item.editedContent ?? item.claim ?? "[기억나지 않음]",
-        sourceRef: item.sequence != null ? `타임라인 #${item.sequence}` : `출처: ${item.source}`,
-      }));
-    }
-    return [];
-  }, [timeline]);
-
-  const handleFinish = useCallback(() => {
-    onFinish({
-      stage: "GENERATE_OUTPUT",
-      assistantMessage: "면접 복기 결과가 생성되었습니다.",
-      question: null,
-      resultDocument: {
-        title,
-        scenario: "INTERVIEW",
-        notice: "이 문서는 사용자의 기억을 구조화한 기록이며 녹취나 객관적 사실 확인 결과가 아닙니다. 확신도는 사용자의 주관적 표시입니다.",
-        markdown,
-        suggestedFileName,
-        // W-17: 초안 복사 필드 별도 필드로도 반환 가능
-        // markdown 전체가 초안 사본이고, retrievalCards가 JSON 식별 가능한 카드 목록
+  // Markdown 본문
+  const markdown = useMemo(
+    () =>
+      buildMarkdown({
+        interviewInfo,
+        quickMemoText,
+        timeline,
+        evaluations,
+        openGaps,
+        comparison: comparisonData,
         retrievalCards,
-      },
-      qualityLog,
-      safety: {
-        injectionCheckPassed: null,
-        rejectedPremiseUsed: false,
-        multipleRecallQuestions: false,
-        certaintyPreserved: true,
-        blockedReason: null,
-        frontendChecks: [
-          "결과 Markdown 상단 고지 문구 포함 확인",
-          "빈 값 [사용자 기입]/[확인 필요]/기억나지 않음 처리 확인",
-          "인출 카드 5~8장 범위 내 생성 확인 (부족 시 억지 생성 없음)",
-          "qualityLog 12개 필드 존재 확인",
-          "봉인 자료 대조 동의 후 포함 확인 (comparison === null 이면 미포함)",
-          "파일명에 경로 문자 미포함 확인",
-          "민감정보 비표시 선택 시 파일명에 이름 미포함 확인",
-          "인출 카드 JSON 식별 가능 구조 포함 확인",
-        ],
-      },
-    });
-  }, [onFinish, title, markdown, suggestedFileName, qualityLog, retrievalCards]);
+        qualityLog,
+        sensitiveNameHidden,
+      }),
+    [interviewInfo, quickMemoText, timeline, evaluations, openGaps, comparisonData, retrievalCards, qualityLog, sensitiveNameHidden]
+  );
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(markdown).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {
-      const textarea = document.createElement("textarea");
-      textarea.value = markdown;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      onCopyMarkdown?.(markdown);
     });
-  };
+  }, [markdown, onCopyMarkdown]);
+
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = suggestedFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    onDownloadMarkdown?.(markdown, suggestedFileName);
+  }, [markdown, suggestedFileName, onDownloadMarkdown]);
+
+  const handleComplete = useCallback(() => {
+    onFinish?.({ stage: "GENERATE_OUTPUT_COMPLETE", markdown, suggestedFileName });
+  }, [markdown, suggestedFileName, onFinish]);
+
+  // retrievalCards JSON — 서비스 카드 UI가 별도 화면에서 읽을 수 있도록 메타에 보존
+  const retrievalCardsJson = useMemo(() => JSON.stringify(retrievalCards, null, 2), [retrievalCards]);
 
   return (
-    <div className="generate-output-screen">
-      <style>{styles}</style>
-
+    <section className="screen generate-output">
       <div className="chapter-head">
         <span className="chapter-num">Chapter 7</span>
         <span className="chapter-title">면접 회고 결과</span>
       </div>
 
       <h1 style={{ textAlign: "center", margin: "16px 0 8px" }}>
-        면접 복기 결과
+        면접 회고 결과가 생성되었습니다
       </h1>
       <p className="hint" style={{ textAlign: "center", marginBottom: "24px" }}>
-        생성된 결과를 확인하고, 필요하면 복사하거나 저장할 수 있습니다.
+        아래 Markdown을 확인·복사·다운로드할 수 있습니다. 원본 기억을 대체하지 않으며, AI 정확성 보증이 아닙니다.
       </p>
 
-      <div className="result-card">
-        <div className="result-card__header">
-          <h2 style={{ margin: 0 }}>{title}</h2>
-          <span className="result-card__file-name">
-            제안 파일명: {suggestedFileName}
-          </span>
+      {/* 파일명 표시 */}
+      <div className="result-meta">
+        <div className="result-meta-row">
+          <span className="result-meta-label">제안 파일명</span>
+          <span className="result-meta-value">{suggestedFileName}</span>
         </div>
-
-        <div className="notice-box">
-          이 문서는 사용자의 기억을 구조화한 기록이며 녹취나 객관적 사실 확인 결과가 아닙니다.
-          확신도는 사용자의 주관적 표시입니다.
-        </div>
-
-        <div className="markdown-preview">
-          <pre>{markdown}</pre>
-        </div>
-
-        <div className="result-actions">
-          <button className="btn btn-ghost" onClick={handleCopy}>
-            {copied ? "복사됨 ✓" : "결과 복사"}
-          </button>
-          <button className="btn btn-primary" onClick={handleFinish}>
-            완료 — 결과 확정
-          </button>
-        </div>
+        {sensitiveNameHidden && (
+          <div className="result-meta-row result-meta-note">
+            <span className="result-meta-label">파일명 민감 정보</span>
+            <span className="result-meta-value">비표시 선택 적용됨</span>
+          </div>
+        )}
       </div>
 
-      <details style={{ marginTop: "16px", fontSize: "0.85rem", color: "var(--muted-foreground)" }}>
-        <summary style={{ cursor: "pointer", fontWeight: 500 }}>품질 로그 (참조용)</summary>
-        <div style={{ marginTop: "8px", padding: "8px 12px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--card)" }}>
-          <pre>{JSON.stringify(qualityLog, null, 2)}</pre>
-        </div>
+      {/* 카드 JSON (서비스 내부용, 접힘) */}
+      <details className="result-card-json">
+        <summary>인출 카드 JSON (서비스용)</summary>
+        <pre className="card-json-pre">{retrievalCardsJson}</pre>
       </details>
 
-      <details style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--muted-foreground)" }}>
-        <summary style={{ cursor: "pointer", fontWeight: 500 }}>인출 카드 (JSON 식별 구조, 참조용)</summary>
-        <div style={{ marginTop: "8px", padding: "8px 12px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--card)" }}>
-          <pre>{JSON.stringify(retrievalCards, null, 2)}</pre>
-        </div>
-      </details>
+      {/* Markdown 본문 */}
+      <div className="markdown-body">
+        <pre className="markdown-pre">{markdown}</pre>
+      </div>
 
-      <details style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--muted-foreground)" }}>
-        <summary style={{ cursor: "pointer", fontWeight: 500 }}>안전 검사 상태 (참조용)</summary>
-        <div style={{ marginTop: "8px", padding: "8px 12px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--card)" }}>
-          <pre>{JSON.stringify({
-            injectionCheckPassed: "null (백엔드/스킬 최종 결정)",
-            rejectedPremiseUsed: false,
-            multipleRecallQuestions: false,
-            certaintyPreserved: true,
-            blockedReason: null,
-          }, null, 2)}</pre>
-        </div>
-      </details>
-    </div>
+      {/* 액션 버튼 */}
+      <div className="result-actions">
+        <button className="btn btn-ghost" onClick={handleCopy}>
+          Markdown 복사
+        </button>
+        <button className="btn btn-primary" onClick={handleDownload}>
+          Markdown 다운로드
+        </button>
+        <button className="btn btn-primary" onClick={handleComplete}>
+          완료
+        </button>
+      </div>
+
+      <style>{`
+        .generate-output { max-width: 900px; margin: 0 auto; padding: 16px; }
+        .result-meta { display: flex; gap: 24px; flex-wrap: wrap; margin: 12px 0 16px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); font-size: 0.9rem; }
+        .result-meta-row { display: flex; gap: 8px; align-items: baseline; }
+        .result-meta-label { color: var(--muted-foreground); font-size: 0.8rem; }
+        .result-meta-value { font-family: ui-monospace, monospace; word-break: break-all; }
+        .result-meta-note { color: var(--muted-foreground); font-style: italic; }
+        .result-card-json { margin: 12px 0; border: 1px dashed var(--border); border-radius: 8px; padding: 8px 12px; background: var(--card); }
+        .result-card-json summary { cursor: pointer; font-size: 0.85rem; color: var(--muted-foreground); }
+        .card-json-pre { margin-top: 8px; background: var(--background); padding: 10px 12px; border-radius: 6px; font-size: 0.75rem; overflow: auto; max-height: 200px; border: 1px solid var(--border); }
+        .markdown-body { margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--background); padding: 16px; max-height: 60vh; overflow: auto; }
+        .markdown-pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 0.95rem; line-height: 1.6; color: var(--foreground); }
+        .result-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+      `}</style>
+    </section>
   );
 }
-
-const styles = `
-  .generate-output-screen { max-width: 800px; margin: 0 auto; padding: 16px; }
-  .result-card {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--card);
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-  .result-card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 12px;
-  }
-  .result-card__file-name {
-    font-size: 0.8rem;
-    color: var(--muted-foreground);
-    font-family: ui-monospace, monospace;
-  }
-  .notice-box {
-    border: 1px solid var(--border);
-    border-left: 3px solid #f59e0b;
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
-    font-size: 0.9rem;
-    color: #92400e;
-    background: color-mix(in srgb, #f59e0b 8%, var(--card));
-  }
-  .markdown-preview {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: auto;
-    max-height: 60vh;
-    background: #1a1f26;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .markdown-preview pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: #e4e4e7;
-  }
-  .result-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
-  .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; border: 1px solid var(--border); background: var(--background); color: var(--foreground); }
-  .btn:hover { background: var(--card); }
-  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
-  .btn-ghost { background: transparent; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .hint { color: var(--muted-foreground); }
-`;

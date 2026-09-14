@@ -18,11 +18,15 @@ export function ReverseRecall({
   onAnswer,
   onSkip,
   initialAnswer = "",
+  question: propQuestion,
+  loading = false,
 }) {
   const [answer, setAnswer] = useState(initialAnswer);
   const [submitted, setSubmitted] = useState(false);
 
+  // 백엔드 /api/recall에서 받은 question이 있으면 우선 사용, 없으면 하드코딩 fallback
   const question =
+    propQuestion ??
     "면접이 끝난 마지막 순간부터 거꾸로 떠올리면, 바로 앞 장면은 무엇인가요?";
 
   const handleSubmit = () => {
@@ -53,7 +57,13 @@ export function ReverseRecall({
       {/* 질문 카드 */}
       <div className="rr-question-card">
         <div className="rr-question-card__label">질문 1/1 (역순)</div>
-        <h2>{question}</h2>
+        {loading ? (
+          <div className="rr-question-card__loading">
+            <span className="rr-question-card__loading-label">질문을 가져오는 중...</span>
+          </div>
+        ) : (
+          <h2>{question}</h2>
+        )}
       </div>
 
       {/* 답변 영역 */}
