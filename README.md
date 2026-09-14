@@ -128,7 +128,6 @@ npm run dev
 
 ## 관련 문서
 
-- [기존 PRD v0.2](docs/PRD_v0.2.md)
 - [팀 규칙](docs/GITHUB_TEAM_RULES.md)
 - [상태 모델](docs/STATE_MODEL.md)
 - [UX 문구](docs/UX_STRINGS.md)
