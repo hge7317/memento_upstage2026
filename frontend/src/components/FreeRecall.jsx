@@ -18,11 +18,14 @@ export function FreeRecall({
   onComplete,
   onSkip,
   initialAnswer = "",
+  question: propQuestion,
+  loading = false,
 }) {
   const [answer, setAnswer] = useState(initialAnswer);
   const [submitted, setSubmitted] = useState(false);
 
-  const question = "시작부터 끝까지 떠오르는 순서대로 말씀해 주세요. 정확하지 않은 부분은 그대로 표시해도 됩니다.";
+  // 백엔드 /api/recall에서 받은 question이 있으면 우선 사용, 없으면 하드코딩 fallback
+  const question = propQuestion ?? "시작부터 끝까지 떠오르는 순서대로 말씀해 주세요. 정확하지 않은 부분은 그대로 표시해도 됩니다.";
 
   const handleSubmit = () => {
     if (answer.trim()) {
@@ -52,7 +55,13 @@ export function FreeRecall({
       {/* 질문 카드 */}
       <div className="free-recall-question-card">
         <div className="free-recall-question-card__label">질문 1/1</div>
-        <h2>{question}</h2>
+        {loading ? (
+          <div className="free-recall-question-card__loading">
+            <span className="free-recall-question-card__loading-label">질문을 가져오는 중...</span>
+          </div>
+        ) : (
+          <h2>{question}</h2>
+        )}
       </div>
 
       {/* 답변 영역 */}

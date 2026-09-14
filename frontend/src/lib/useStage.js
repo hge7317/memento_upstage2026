@@ -6,11 +6,11 @@ import { useState, useEffect } from "react";
  */
 const STAGE_ORDER = [
   "splash",
-  "scenario",
   "quick-memo",
   "extract-candidates",
   "user-verify",
-  "objective-frame",
+  "job-posting-optional",
+  "interview-initial-info",
   "context-reinstatement",
   "free-recall",
   "structural-cue",

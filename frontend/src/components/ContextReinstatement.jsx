@@ -18,11 +18,12 @@ export function ContextReinstatement({
   onAnswer,
   onSkip,
   onEarlyFinish,
-  interviewMode = "대면", // 대면/비대면 (인터뷰 기본 정보에서 받은 값)
+  interviewMode = "대면",
+  question: propQuestion,
+  loading = false,
 }) {
-  // 질문: 대면/비대면 구분 없이 직전 위치·주변·몸 상태 (PRD §10 예문 기반)
-  // 비대면일 때도 "면접이 시작되기 직전, 사용자가 있던 위치와 주변 모습"이라는 표현은 유효
-  const question = "면접이 시작되기 직전, 사용자가 있던 위치와 주변 모습에서 기억나는 것은 무엇인가요?";
+  // 백엔드 /api/recall에서 받은 question이 있으면 우선 사용, 없으면 하드코딩 fallback
+  const question = propQuestion ?? "면접이 시작되기 직전, 사용자가 있던 위치와 주변 모습에서 기억나는 것은 무엇인가요?";
 
   const [answer, setAnswer] = useState("");
 
@@ -59,10 +60,18 @@ export function ContextReinstatement({
       {/* 질문 카드 */}
       <div className="context-question-card">
         <div className="context-question-card__label">질문 1/1</div>
-        <h2>{question}</h2>
-        <p className="context-question-card__note">
-          대면/비대면 모두 해당합니다. 들어가기 직전의 위치, 자리, 주변, 몸 상태를 떠올려 보세요.
-        </p>
+        {loading ? (
+          <div className="context-question-card__loading">
+            <span className="context-question-card__loading-label">질문을 가져오는 중...</span>
+          </div>
+        ) : (
+          <>
+            <h2>{question}</h2>
+            <p className="context-question-card__note">
+              대면/비대면 모두 해당합니다. 들어가기 직전의 위치, 자리, 주변, 몸 상태를 떠올려 보세요.
+            </p>
+          </>
+        )}
       </div>
 
       {/* 답변 입력 */}
