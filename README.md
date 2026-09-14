@@ -22,6 +22,10 @@
 
 ## 저장소 구조
 
+```text
+frontend/     # 웹 UI, 상태 관리, 로컬 저장 유틸리티
+backend/      # 목업 데이터, API 인터페이스 초안
+docs/         # PRD, 팀 규칙, 상태 모델, UX 문구, QA
 ```
 frontend/
 backend/
@@ -34,7 +38,9 @@ scripts/
 
 ```bash
 git clone https://github.com/hge7317/memento_upstage2026.git
-cd memento_upstage2026
+cd memento_upstage2026/frontend
+npm install
+npm run dev
 ```
 
 ## Solar 연동 메모
