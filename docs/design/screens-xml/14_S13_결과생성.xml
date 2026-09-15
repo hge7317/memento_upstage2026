@@ -1,0 +1,654 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:cSld>
+    <p:bg>
+      <p:bgPr>
+        <a:solidFill>
+          <a:srgbClr val="EFF3F1"/>
+        </a:solidFill>
+      </p:bgPr>
+    </p:bg>
+    <p:spTree>
+      <p:nvGrpSpPr>
+        <p:cNvPr id="1" name=""/>
+        <p:cNvGrpSpPr/>
+      </p:nvGrpSpPr>
+      <p:grpSpPr>
+        <a:xfrm/>
+      </p:grpSpPr>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="43" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{91293009-AF80-48C9-9B03-6D1E45FB66D4}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="-3048" y="-761"/>
+            <a:ext cx="8858250" cy="5095875"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 1869"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="FFFFFF"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="D5DEDA"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+        <p:style>
+          <a:lnRef idx="0"/>
+          <a:fillRef idx="0"/>
+          <a:effectRef idx="4"/>
+          <a:fontRef idx="major"/>
+        </p:style>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="44" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{415BF928-1C24-4F7A-8E16-BEC3353470FC}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="-3048" y="-761"/>
+            <a:ext cx="8858250" cy="495300"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 19231"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="FFFFFF"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="D5DEDA"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="45" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{19B07141-512E-4892-ABEB-F2B0CDC30A38}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="206501" y="189738"/>
+            <a:ext cx="66675" cy="66675"/>
+          </a:xfrm>
+          <a:prstGeom prst="ellipse">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="FF7042"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="FF7042"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="46" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{D247282A-FF39-4445-A406-8A8899F4D3A8}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="273176" y="223076"/>
+            <a:ext cx="76200" cy="0"/>
+          </a:xfrm>
+          <a:prstGeom prst="line">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="A5B0AC"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="47" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{83DD5AA2-4858-4CDD-9575-53549EC9D622}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="349376" y="189738"/>
+            <a:ext cx="66675" cy="66675"/>
+          </a:xfrm>
+          <a:prstGeom prst="ellipse">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="4FDCFF"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="4FDCFF"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="48" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{B364FED4-70E4-43B6-A3EE-6526228DAFB7}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="492251" y="75438"/>
+            <a:ext cx="1257300" cy="342900"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="0">
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="76200" tIns="38100" rIns="76200" bIns="38100" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="l">
+              <a:lnSpc>
+                <a:spcPct val="105000"/>
+              </a:lnSpc>
+              <a:buNone/>
+              <a:defRPr sz="1050" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="102820"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="1050" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="102820"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>MEMENTO</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="49" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{6154D614-BD57-4127-AC07-63E75490DF24}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="7731252" y="123062"/>
+            <a:ext cx="876300" cy="247650"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 50000"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="EDF8F5"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="EDF8F5"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr lIns="57150" tIns="9525" rIns="57150" bIns="9525" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="ctr">
+              <a:defRPr sz="900" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="0F766E"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="900" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="0F766E"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>저장 완료</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="50" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{CD96C514-A21C-4601-A5F4-105C8D037D74}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="1997202" y="1123188"/>
+            <a:ext cx="4857750" cy="3143250"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 5455"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="FFFFFF"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="D5DEDA"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+        <p:style>
+          <a:lnRef idx="0"/>
+          <a:fillRef idx="0"/>
+          <a:effectRef idx="6"/>
+          <a:fontRef idx="major"/>
+        </p:style>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="51" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{7A0A464A-FB73-44E5-A2A3-D79594CC8E7A}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="3911727" y="1504188"/>
+            <a:ext cx="1028700" cy="1028700"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 50000"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="DDF1EC"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="DDF1EC"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="52" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{ADA383DF-15AA-4A5E-B04C-ED53EAAA9C8B}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="3911727" y="1504188"/>
+            <a:ext cx="1028700" cy="1028700"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="0">
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="76200" tIns="38100" rIns="76200" bIns="38100" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="ctr">
+              <a:lnSpc>
+                <a:spcPct val="105000"/>
+              </a:lnSpc>
+              <a:buNone/>
+              <a:defRPr sz="1575" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="0F766E"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="1575" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="0F766E"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>DOC</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="53" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{DA88AC0D-8B50-42CE-9661-5F94C665DDF2}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="2340102" y="2675763"/>
+            <a:ext cx="4171950" cy="361950"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="0">
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="76200" tIns="38100" rIns="76200" bIns="38100" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="ctr">
+              <a:lnSpc>
+                <a:spcPct val="105000"/>
+              </a:lnSpc>
+              <a:buNone/>
+              <a:defRPr sz="1650" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="102820"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="1650" b="1">
+                <a:solidFill>
+                  <a:srgbClr val="102820"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>면접 복기 결과를 만들고 있어요</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="54" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{D26AA156-F23D-484C-AC1B-7E9AE5046BD5}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="2530602" y="3104388"/>
+            <a:ext cx="3790950" cy="495300"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="0">
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="76200" tIns="38100" rIns="76200" bIns="38100" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="ctr">
+              <a:lnSpc>
+                <a:spcPct val="105000"/>
+              </a:lnSpc>
+              <a:buNone/>
+              <a:defRPr sz="1050" b="0">
+                <a:solidFill>
+                  <a:srgbClr val="64736D"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="1050" b="0">
+                <a:solidFill>
+                  <a:srgbClr val="64736D"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>확인한 내용만 사용해 타임라인과 요약을 정리하는 중입니다.</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="55" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{639DBE3C-B621-4DD0-B418-73EF31968397}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="2816352" y="3790187"/>
+            <a:ext cx="3219450" cy="76200"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 50000"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="E2EAE7"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="E2EAE7"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="56" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{2AACC9FA-6D7E-4439-9276-26E6DB3452AB}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="2816352" y="3790187"/>
+            <a:ext cx="2628900" cy="76200"/>
+          </a:xfrm>
+          <a:prstGeom prst="roundRect">
+            <a:avLst>
+              <a:gd name="adj" fmla="val 50000"/>
+            </a:avLst>
+          </a:prstGeom>
+          <a:solidFill>
+            <a:srgbClr val="2F9388"/>
+          </a:solidFill>
+          <a:ln w="9525">
+            <a:solidFill>
+              <a:srgbClr val="2F9388"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="57" name="">
+            <a:extLst>
+              <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
+                <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{D3805E4B-37D5-4A50-AA09-A1E5E619E9E2}"/>
+              </a:ext>
+            </a:extLst>
+          </p:cNvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="3292602" y="3980688"/>
+            <a:ext cx="2266950" cy="228600"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln w="0">
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="76200" tIns="38100" rIns="76200" bIns="38100" anchor="ctr">
+            <a:normAutofit fontScale="100000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr algn="ctr">
+              <a:lnSpc>
+                <a:spcPct val="105000"/>
+              </a:lnSpc>
+              <a:buNone/>
+              <a:defRPr sz="900" b="0">
+                <a:solidFill>
+                  <a:srgbClr val="64736D"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:defRPr>
+            </a:pPr>
+            <a:r>
+              <a:rPr sz="900" b="0">
+                <a:solidFill>
+                  <a:srgbClr val="64736D"/>
+                </a:solidFill>
+                <a:latin typeface="Pretendard"/>
+                <a:ea typeface="Pretendard"/>
+                <a:cs typeface="Pretendard"/>
+              </a:rPr>
+              <a:t>문서 생성 중</a:t>
+            </a:r>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+    <p:extLst>
+      <p:ext uri="{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}">
+        <p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1356201557"/>
+      </p:ext>
+    </p:extLst>
+  </p:cSld>
+</p:sld>

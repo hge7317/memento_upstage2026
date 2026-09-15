@@ -77,6 +77,7 @@ app.post("/api/recall", async (req, res) => {
 - 불확실한 기억을 확정형으로 바꾸지 않습니다.
 - 평가·정답을 암시하지 않습니다.
 - REJECTED(이런 내용 없음) 후보를 질문 전제로 사용하지 않습니다.
+- 질문에 쓰는 구체 명사(사람·장소·물건·발언)는 반드시 "확인된 기억" 또는 "직전 답변"에 등장한 표현이어야 한다. 그 밖의 명사는 쓰지 않습니다.
 
 ## 출력 형식
 반드시 유효한 JSON으로만 응답합니다. Markdown 코드 펜스(\`\`\`)를 붙이지 않습니다.
@@ -131,7 +132,12 @@ questionSource는 질문의 출처 범주를 나타냅니다:
     const userPrompt = `다음 세션 정보를 바탕으로 회상 질문을 생성해 주세요.
 
 요청 단계: ${contextType}
-세션 컨텍스트: ${context || "없음"}
+확인된 기억(이 목록에 있는 표현만 질문에 쓸 수 있음):
+${(context?.confirmedItems ?? []).map((s,i)=>`${i+1}. ${s}`).join("\n") || "없음"}
+거절된 내용(질문·전제에 절대 사용 금지):
+${(context?.rejectedItems ?? []).map(s=>`- ${s}`).join("\n") || "없음"}
+면접 기본 정보(배경으로만): ${JSON.stringify(context?.interviewInfo ?? {})}
+직전 답변: ${context?.previousAnswer || "없음"}
 
 참고: 면접 기본 정보(회사, 직무, 일시, 방식, 단계, 면접관 수)가 있으면 배경으로만 참고하고, 잡포스팅 URL이 있으면 배경 맥락으로만 참고합니다. 공고 내용을 실제 면접 질문/사건으로 전제하지 않습니다.
 
@@ -158,6 +164,9 @@ questionSource는 질문의 출처 범주를 나타냅니다:
     }
 
     if (parsed && typeof parsed.question === "string") {
+      const rejected = context?.rejectedItems ?? [];
+      const hit = rejected.find(r => r && parsed.question.includes(r));
+      if (hit) { parsed.question = "그다음에 기억나는 것은 무엇인가요?"; parsed.safety = { ...(parsed.safety||{}), injectionCheckPassed:false, blockedReason:"REJECTED_PREMISE" }; }
       const response = {
         stage: requestStage.toUpperCase().replace(/-/g, "_"),
         nextStage: requestStage === "context-reinstatement" ? "FREE_RECALL"
