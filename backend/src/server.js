@@ -1,7 +1,7 @@
 import express from "express";
 import { mockRecallQuestion } from "./mock-api.js";
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
@@ -270,7 +270,10 @@ ${(context?.rejectedItems ?? []).map(s=>`- ${s}`).join("\n") || "없음"}
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Memory Replay backend running on port ${PORT}`);
-  console.log(`Solar Pro 4: ${SOLAR_API_KEY ? "configured" : "NOT CONFIGURED — using mock fallback"}`);
-});
+// 서버 시작 (Vercel 환경에서는 호출하지 않음)
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`Memory Replay backend running on port ${PORT}`);
+    console.log(`Solar Pro 4: ${SOLAR_API_KEY ? "configured" : "NOT CONFIGURED — using mock fallback"}`);
+  });
+}
