@@ -1,146 +1,260 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
 const STEPS = [
   {
     id: "context-reinstatement",
-    step: "STEP 1 · 직전 맥락 회상",
+    tag: "STEP 1 · 사건 직전 맥락",
     count: "회상 1 / 4",
-    question: "면접이 시작되기 직전, 있던 위치와 주변 모습에서 기억나는 것은 무엇인가요?",
-    hint: "직전 상황과 주변을 떠올려보세요.",
-    example: "면접 장소 도착 직전, 엘리베이터 앞에서 대기하던 장면이 떠올라요.",
+    question: "면접이 시작되기 직전, 어떤 상황이었는지 떠오르는 대로 말해주세요.",
+    placeholder: "기억나는 내용을 자유롭게 입력하세요",
+    fallback: "면접이 시작되기 직전, 어떤 상황이었는지 떠오르는 대로 말해주세요.",
   },
   {
     id: "free-recall",
-    step: "STEP 2 · 사실/평가/불확실 분리",
+    tag: "STEP 2 · 자유 서술",
     count: "회상 2 / 4",
-    question: "면접이 시작되고 가장 먼저 기억나는 장면은 무엇인가요?",
-    hint: "순서를 맞추려고 하지 말고, 지금 떠오르는 질문이나 장면을 자유롭게 말해주세요.",
-    example: "자기소개 다음에 최근 프로젝트를 설명했고, 보드에 코드가 있었어요.",
+    question: "순서를 맞추려고 하지 말고, 지금 떠오르는 질문이나 장면을 자유롭게 말해주세요.",
+    placeholder: "순서와 관계없이 떠오르는 내용을 적어주세요",
+    fallback: "순서를 맞추려고 하지 말고, 지금 떠오르는 질문이나 장면을 자유롭게 말해주세요.",
   },
   {
     id: "structural-cue",
-    step: "STEP 3 · 시간·공간·감각·행동 단서",
+    tag: "STEP 3 · 시간·공간·감각·행동 단서",
     count: "회상 3 / 4",
     question: "코드 질문을 받을 때, 어디에 앉아 있었고 시선은 어디를 향했나요?",
-    hint: "단서를 따라 떠오르는 내용을 입력하세요",
-    example: "면접관 두 명의 맞은편에 앉았고, 가운데 보드를 보며 답했던 것 같아요.",
+    placeholder: "단서를 따라 떠오르는 내용을 입력하세요",
+    fallback: "코드 질문을 받을 때, 어디에 앉아 있었고 시선은 어디를 향했나요?",
   },
   {
     id: "reverse-recall",
-    step: "STEP 4 · 마지막 순간부터 역순 회상",
+    tag: "STEP 4 · 마지막 순간부터 역순 회상",
     count: "회상 4 / 4",
     question: "면접이 끝나기 직전의 마지막 장면부터 거꾸로 떠올려볼게요. 가장 마지막에 누가 무엇을 했나요?",
-    hint: "마지막에서 앞으로 거꾸로 떠올려보세요",
-    example: "면접관이 추가로 궁금한 점이 있는지 물었고, 제가 질문 하나를 했어요.",
+    placeholder: "마지막에서 앞으로 거꾸로 떠올려보세요",
+    fallback: "면접이 끝나기 직전의 마지막 장면부터 거꾸로 떠올려볼게요. 가장 마지막에 누가 무엇을 했나요?",
   },
 ];
 
-const RecallSteps = ({ session, setSession }) => {
+function confirmedItems(session) {
+  if (!Array.isArray(session?.candidates)) return [];
+  return session.candidates
+    .filter((c) => c && (c.status === "CONFIRMED" || c.status === "EDITED" || c.status === "UNKNOWN"))
+    .map((c) => (c.status === "EDITED" && c.editedClaim ? c.editedClaim : c.claim))
+    .filter(Boolean);
+}
+
+function rejectedItems(session) {
+  if (!Array.isArray(session?.candidates)) return [];
+  return session.candidates
+    .filter((c) => c && c.status === "REJECTED" && c.claim)
+    .map((c) => c.claim);
+}
+
+function previousUserMessage(messages, stepId) {
+  const stepMessages = messages[stepId] || [];
+  const userMessages = stepMessages.filter((m) => m && m.role === "user");
+  if (userMessages.length === 0) return "";
+  return userMessages[userMessages.length - 1].text;
+}
+
+function totalUserMessages(messages, stepId) {
+  const stepMessages = messages[stepId] || [];
+  return stepMessages.filter((m) => m && m.role === "user").length;
+}
+
+export default function RecallSteps({ session, setSession }) {
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
   const [step, setStep] = useState(0);
+  const [messages, setMessages] = useState({});
+  const [input, setInput] = useState("");
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
-  const [question, setQuestion] = useState(STEPS[0].question);
 
   const current = STEPS[step];
   const progress = ((step + 1) / STEPS.length) * 100;
 
   useEffect(() => {
-    let cancelled = false;
+    const stepMessages = messages[current.id];
+    const alreadyHasAi = Array.isArray(stepMessages) && stepMessages.some((m) => m && m.role === "ai");
+    if (alreadyHasAi) return;
 
-    async function fetchQuestion() {
+    let cancelled = false;
+    setLoading(true);
+
+    (async () => {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5000);
 
-        const confirmedItems = [];
-        const rejectedItems = [];
-        if (session?.candidates) {
-          for (const c of session.candidates) {
-            if (c.status === "CONFIRMED" || c.status === "EDITED" || c.status === "UNKNOWN") {
-              if (c.claim) confirmedItems.push(c.claim);
-            } else if (c.status === "REJECTED") {
-              if (c.claim) rejectedItems.push(c.claim);
-            }
-          }
-        }
-
-        const interviewInfo = session?.interviewInfo ?? {};
-        const previousAnswer = answers[current.id] ?? "";
+        const body = JSON.stringify({
+          sessionId: session?.sessionId,
+          contextType: current.id,
+          context: {
+            confirmedItems: confirmedItems(session),
+            rejectedItems: rejectedItems(session),
+            interviewInfo: {
+              company: session?.company,
+              role: session?.role,
+              date: session?.date,
+              type: session?.type,
+              round: session?.round,
+              url: session?.url,
+            },
+            previousAnswer: previousUserMessage(messages, current.id),
+          },
+        });
 
         const res = await fetch("http://localhost:3001/api/recall", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId: session?.id,
-            contextType: current.id,
-            context: {
-              confirmedItems,
-              rejectedItems,
-              interviewInfo,
-              previousAnswer,
-            },
-          }),
+          body,
           signal: controller.signal,
         });
         clearTimeout(timeout);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (!cancelled && data.question) {
-          setQuestion(data.question);
+        if (!cancelled && typeof data.question === "string" && data.question.trim()) {
+          addAiMessage(data.question.trim());
+        } else if (!cancelled) {
+          addAiMessage(current.fallback);
         }
       } catch (e) {
         if (!cancelled) {
-          console.warn("recall fallback");
-          setQuestion(current.question);
+          addAiMessage(current.fallback);
         }
       }
+    })();
+
+    function addAiMessage(text) {
+      if (cancelled) return;
+      setMessages((prev) => ({
+        ...prev,
+        [current.id]: [...(prev[current.id] || []), { role: "ai", text }],
+      }));
+      setLoading(false);
     }
 
-    fetchQuestion();
     return () => {
       cancelled = true;
     };
-  }, [step, current.id, session?.id]);
+  }, [step, current.id]);
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, step]);
+
+  function appendMessage(role, text) {
+    if (!text || !text.trim()) return;
+    setMessages((prev) => ({
+      ...prev,
+      [current.id]: [...(prev[current.id] || []), { role, text: text.trim() }],
+    }));
+  }
+
+  function clearInput() {
+    setInput("");
+  }
+
+  async function fetchNext(questionText) {
     setLoading(true);
-    setAnswers((a) => ({ ...a, [current.id]: "" }));
-    setLoading(false);
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+
+      const body = JSON.stringify({
+        sessionId: session?.sessionId,
+        contextType: current.id,
+        context: {
+          confirmedItems: confirmedItems(session),
+          rejectedItems: rejectedItems(session),
+          interviewInfo: {
+            company: session?.company,
+            role: session?.role,
+            date: session?.date,
+            type: session?.type,
+            round: session?.round,
+            url: session?.url,
+          },
+          previousAnswer: questionText,
+        },
+      });
+
+      const res = await fetch("http://localhost:3001/api/recall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (typeof data.question === "string" && data.question.trim()) {
+        appendMessage("ai", data.question.trim());
+      } else {
+        appendMessage("ai", current.fallback);
+      }
+    } catch (e) {
+      appendMessage("ai", current.fallback);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSubmit() {
+    if (!input || !input.trim()) return;
+    appendMessage("user", input);
+    const myAnswer = input.trim();
+    clearInput();
+    await fetchNext(myAnswer);
+  }
+
+  function handleSkip() {
+    appendMessage("user", "");
+    fetchNext("");
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  }
+
+  function handleStepComplete() {
+    const userTexts = (messages[current.id] || [])
+      .filter((m) => m && m.role === "user" && m.text)
+      .map((m) => m.text);
+    const answerText = userTexts.join("\n");
+
+    const nextAnswers = { ...answers, [current.id]: answerText };
+    setAnswers(nextAnswers);
     if (step < STEPS.length - 1) {
       setStep((s) => s + 1);
     } else {
       setSession((s) => ({
         ...s,
         stage: "timeline-review",
-        answers,
+        answers: nextAnswers,
+        recallMessages: messages,
       }));
-      navigate("/timeline-review", { replace: true });
+      navigate("/timeline-review/new", { replace: true });
     }
-  };
+  }
 
-  const handleSkip = () => {
-    if (step < STEPS.length - 1) {
-      setStep((s) => s + 1);
-    } else {
-      setSession((s) => ({ ...s, stage: "timeline-review", answers }));
-      navigate("/timeline-review", { replace: true });
-    }
-  };
-
-  const handleChange = (text) => {
-    setAnswers((a) => ({ ...a, [current.id]: text }));
-  };
+  const answersRef = { current: {} };
 
   return (
-    <div className="slide">
+    <div className="screen screen--white recall">
       <Header />
-
       <div className="recall__header">
-        <div className="recall__step-tag">{current.step}</div>
+        <div className="recall__step-tag">{current.tag}</div>
         <div className="recall__count">{current.count}</div>
       </div>
 
@@ -149,65 +263,48 @@ const RecallSteps = ({ session, setSession }) => {
         <div className="recall__bar-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="recall__block">
-        <div className="recall__q">
-          <div className="recall__q-m">M</div>
-          <div className="recall__q-text">{question}</div>
-        </div>
-
-        <div className="recall__a">
-          <div className="recall__a-m">M</div>
-          <div className="recall__a-card">
-            <textarea
-              className="recall__a-input"
-              value={answers[current.id] || ""}
-              onChange={(e) => handleChange(e.target.value)}
-              placeholder={current.example}
-              rows={4}
-            />
-          </div>
-        </div>
-
-        <div className="recall__next">
-          <div className="recall__next-m">M</div>
-          <div className="recall__next-card">
-            <textarea
-              className="recall__next-input"
-              value=""
-              readOnly
-              placeholder={current.hint}
-              rows={3}
-            />
-          </div>
-        </div>
-
-        <div className="recall__scroll">
-          <div className="recall__scroll-line">⋮</div>
-        </div>
+      <div className="recall__dialog" ref={scrollRef}>
+        {(messages[current.id] || []).map((m, idx) => {
+          if (m.role === "ai") {
+            return (
+              <div key={`ai-${idx}`} className="recall__ai-bubble">
+                <div className="recall__avatar">M</div>
+                <div className="recall__speech">{m.text}</div>
+              </div>
+            );
+          }
+          return (
+            <div key={`user-${idx}`} className="recall__user-bubble">
+              <div className="recall__user-card">{m.text}</div>
+            </div>
+          );
+        })}
+        <div className="recall__scroll">⋮</div>
       </div>
 
-      <div className="recall__input-area">
-        <span className="recall__input-hint">순서와 관계없이 떠오르는 내용을 적어주세요</span>
+      <div className="recall__input-card">
         <textarea
           className="recall__input-field"
-          value={answers[current.id] || ""}
-          onChange={(e) => handleChange(e.target.value)}
-          placeholder={current.example}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={current.placeholder}
           rows={4}
+          disabled={loading}
         />
-        <button className="recall__input-up">↑</button>
+        <button className="recall__attach" onClick={handleSubmit} disabled={loading}>
+          ↑
+        </button>
       </div>
 
       <div className="recall__actions">
-        <button className="btn btn--soft" onClick={handleSkip}>
+        <button className="btn btn--soft" onClick={handleSkip} disabled={loading}>
           건너뛰기
         </button>
-        <button className="btn btn--soft" onClick={handleSubmit} disabled={loading}>
-          {loading ? "저장 중…" : "단계 완료"}
+        <button className="btn btn--soft" onClick={handleStepComplete} disabled={loading}>
+          {loading ? "전송 중…" : "단계 완료"}
         </button>
       </div>
     </div>
   );
-};
-
-export default RecallSteps;
+}

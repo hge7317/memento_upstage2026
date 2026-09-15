@@ -15,6 +15,8 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1:3000",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "http://localhost:3005",
+  "http://127.0.0.1:3005",
 ];
 
 app.use((req, res, next) => {
@@ -60,9 +62,9 @@ async function callSolar(messages, maxTokens = 1024) {
 
 // POST /api/recall — 회상 질문 생성
 app.post("/api/recall", async (req, res) => {
+  const requestStage = req.body?.contextType || "recall";
   try {
     const { sessionId, context, contextType, questionCount = 1 } = req.body;
-    const requestStage = contextType || "recall";
 
     // Solar 호출 — 회상 질문 생성 프롬프트 (output-contract.md 준수)
     const systemPrompt = `당신은 Memory Replay 서비스의 회상 질문 생성기입니다.

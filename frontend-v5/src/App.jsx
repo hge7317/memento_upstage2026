@@ -7,6 +7,7 @@ import InterviewInitialInfo from "./pages/InterviewInitialInfo";
 import QuickMemo from "./pages/QuickMemo";
 import ExtractCandidates from "./pages/ExtractCandidates";
 import UserVerify from "./pages/UserVerify";
+import VerifyComplete from "./pages/VerifyComplete";
 import RecallSteps from "./pages/RecallSteps";
 import TimelineReview from "./pages/TimelineReview";
 import GenerateOutput from "./pages/GenerateOutput";
@@ -227,6 +228,12 @@ function App() {
         }
       />
       <Route
+        path="/verify-complete"
+        element={
+          session ? <VerifyComplete session={session} setSession={setSession} /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route
         path="/recall"
         element={
           session ? <RecallSteps session={session} setSession={setSession} /> : <Navigate to="/login" replace />
@@ -241,8 +248,9 @@ function App() {
               session={session}
               onSave={(timeline, meta) => {
                 const rec = session?.recordId ? getRecord(session.recordId) : null;
+                const recId = rec?.id || `rec-${Date.now()}`;
                 persistSessionAsRecord({
-                  ...(rec || { id: `rec-${Date.now()}` }),
+                  ...(rec || { id: recId }),
                   timeline,
                   company: meta.company,
                   role: meta.role,
@@ -251,12 +259,13 @@ function App() {
                   round: meta.round,
                   quickMemo: meta.quickMemo,
                   answers: meta.answers,
+                  candidates: session?.candidates || [],
                 });
                 setSession((s) =>
                   s
                     ? {
                         ...s,
-                        recordId: rec?.id || `rec-${Date.now()}`,
+                        recordId: recId,
                         company: meta.company,
                         role: meta.role,
                         date: meta.date,
@@ -268,7 +277,7 @@ function App() {
                       }
                     : s
                 );
-                navigate(`/result/${session?.recordId || `rec-${Date.now()}`}`);
+                navigate("/generate-output", { replace: true });
               }}
             />
           ) : (

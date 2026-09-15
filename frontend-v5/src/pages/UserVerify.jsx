@@ -81,7 +81,7 @@ export default function UserVerify({ session, setSession }) {
   const handleDone = () => {
     if (!isAllDone) return;
     setSession((s) => ({ ...s, stage: "recall" }));
-    navigate("/recall", { replace: true });
+    navigate("/verify-complete", { replace: true });
   };
 
   const renderCandidate = (c) => {
