@@ -11,6 +11,7 @@ const SOLAR_MODEL = "solar-pro4";
 
 // CORS — 프론트 origin 허용 (개발 환경)
 const ALLOWED_ORIGINS = [
+  ...(process.env.FRONTEND_ORIGIN ? process.env.FRONTEND_ORIGIN.split(",") : []),
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:5173",
