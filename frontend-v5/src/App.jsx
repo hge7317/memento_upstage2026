@@ -174,7 +174,7 @@ function App() {
         path="/login"
         element={
           session ? (
-            <Navigate to={session.stage === Stage.INTERVIEW_INITIAL_INFO ? "/prepared" : "/prepared"} replace />
+            <Navigate to={sessionStorage.getItem("memento.dest") === "archive" ? "/archive" : "/prepared"} replace />
           ) : (
             <Login onLogin={startSession} />
           )

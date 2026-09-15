@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -18,7 +19,13 @@ const Login = ({ onLogin }) => {
     try {
       await new Promise((r) => setTimeout(r, 600));
       if (onLogin) onLogin();
-      else navigate("/interview-initial-info", { replace: true });
+      const dest = sessionStorage.getItem("memento.dest");
+      if (dest === "archive") {
+        navigate("/archive", { replace: true });
+      } else {
+        navigate("/prepared", { replace: true });
+      }
+      sessionStorage.removeItem("memento.dest");
     } catch {
       setError("로그인에 실패했습니다. 다시 시도해주세요.");
     } finally {
@@ -26,26 +33,23 @@ const Login = ({ onLogin }) => {
     }
   };
 
+  const handBack = () => navigate("/", { replace: true });
+
   return (
-    <div className="screen">
-      <header className="header">
-        <div className="header__dots">
-          <span className="header__dot header__dot--orange" />
-          <span className="header__dot header__dot--teal" />
-        </div>
-        <div className="header__logo">MEMENTO</div>
-        <span className="save-chip">저장 완료</span>
-      </header>
+    <div className="screen screen--dark">
+      <Header onBack={handBack} />
 
       <div className="login__card">
-        <div className="login__badge">
-          <span className="header__dot header__dot--orange" />
-          <span className="header__dot header__dot--teal" />
+        <div className="login__neuron" aria-hidden="true">
+          <span className="login__neuron-dot login__neuron-dot--coral" />
+          <span className="login__neuron-line" />
+          <span className="login__neuron-dot login__neuron-dot--cyan" />
         </div>
+
         <div className="login__brand">MEMENTO</div>
 
-        <h2 className="t-title">면접 기록을 이어서 정리하세요</h2>
-        <p className="t-sub">
+        <h2 className="login__title">면접 기록을 이어서 정리하세요</h2>
+        <p className="login__sub">
           로그인하면 여러 면접의 사전 정보와 복기 기록을 안전하게 구분해 저장합니다.
         </p>
 
@@ -84,9 +88,13 @@ const Login = ({ onLogin }) => {
         </button>
 
         <div className="login__links">
-          <button className="btn btn--ghost login__link">회원가입</button>
+          <a className="login__link" href="#" onClick={(e) => e.preventDefault()}>
+            회원가입
+          </a>
           <span className="login__dot">·</span>
-          <button className="btn btn--ghost login__link">비밀번호 찾기</button>
+          <a className="login__link" href="#" onClick={(e) => e.preventDefault()}>
+            비밀번호 찾기
+          </a>
         </div>
       </div>
     </div>

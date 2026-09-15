@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 const mockUpcoming = [
   {
@@ -47,7 +48,7 @@ const PrepareInterview = ({ onStartInterview }) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("upcoming");
   const [search, setSearch] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   const filtered = (tab === "upcoming" ? mockUpcoming : mockPast).filter((it) => {
     const q = search.trim().toLowerCase();
@@ -58,7 +59,7 @@ const PrepareInterview = ({ onStartInterview }) => {
     );
   });
 
-  const handleStart = (it) => {
+  const handleQuickMemo = (it) => {
     onStartInterview?.({
       company: it.company,
       role: it.role,
@@ -66,172 +67,90 @@ const PrepareInterview = ({ onStartInterview }) => {
       type: it.type,
       round: it.round,
     });
-    navigate("/interview-initial-info", { replace: true });
+    navigate("/quick-memo", { replace: true });
+  };
+
+  const handleEdit = (it) => {
+    navigate("/interview-initial-info", {
+      state: { edit: it },
+      replace: true,
+    });
   };
 
   return (
-    <div className="screen">
-      <header className="header">
-        <div className="header__dots">
-          <span className="header__dot header__dot--orange" />
-          <span className="header__dot header__dot--teal" />
-        </div>
-        <div className="header__logo">MEMENTO</div>
-        <span className="save-chip">저장 완료</span>
-      </header>
+    <div className="screen screen--white">
+      <Header onBack={() => navigate("/", { replace: true })} />
 
-      <div className="prepare__body">
-        <div className="prepare__head">
+      <div className="prep__body">
+        <div className="prep__head">
           <h2 className="t-title">준비 중인 면접</h2>
           <p className="t-sub">
             면접을 선택하면 끝난 직후 바로 빠른 메모를 시작할 수 있어요.
           </p>
         </div>
 
-        <button className="btn btn--teal prepare__new" onClick={() => setCreating(true)}>
+        <button className="btn btn--primary prep__new" onClick={() => navigate("/interview-initial-info", { replace: true })}>
           + 새 면접
         </button>
 
-        <div className="prepare__tabs">
+        <div className="prep__tabs">
           <button
-            className={`prepare__tab ${tab === "upcoming" ? "prepare__tab--active" : ""}`}
+            className={`prep__tab ${tab === "upcoming" ? "prep__tab--active" : ""}`}
             onClick={() => setTab("upcoming")}
           >
             예정 {mockUpcoming.length}
           </button>
           <button
-            className={`prepare__tab ${tab === "past" ? "prepare__tab--active" : ""}`}
+            className={`prep__tab ${tab === "past" ? "prep__tab--active" : ""}`}
             onClick={() => setTab("past")}
           >
             지난 면접
           </button>
         </div>
 
-        <div className="prepare__search">
+        <div className="prep__search">
           <input
-            className="prepare__search-input"
+            className="prep__search-input"
             placeholder="회사명, 직무로 검색"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="prepare__list">
+        <div className="prep__list">
           {filtered.map((it) => (
-            <div key={it.id} className="prepare__item">
-              <div className="prepare__item-body">
-                <div className="prepare__item-title">{it.company}</div>
-                <div className="prepare__item-role">{it.role}</div>
-                <div className="prepare__item-meta">
+            <div
+              key={it.id}
+              className={`prep__item ${selectedId === it.id ? "prep__item--selected" : ""}`}
+              onClick={() => setSelectedId(it.id)}
+            >
+              <div className="prep__item-chip">
+                <span className="prep__chip">{it.status === "예정" ? `D-${mockUpcoming.indexOf(it) + 1}` : "완료"}</span>
+              </div>
+              <div className="prep__item-body">
+                <div className="prep__item-title">{it.company}</div>
+                <div className="prep__item-role">{it.role}</div>
+                <div className="prep__item-meta">
                   {it.date} · {it.type} · {it.round}
                 </div>
               </div>
-              <div className="prepare__item-actions">
-                {it.status === "예정" ? (
-                  <button className="btn btn--teal prepare__start" onClick={() => onStart?.(it.id)}>
-                    시작
-                  </button>
-                ) : (
-                  <button className="btn btn--teal prepare__open" onClick={() => navigate("/archive")}>
-                    열기
-                  </button>
-                )}
-                <button className="btn btn--inline prepare__delete">삭제</button>
+              <div className="prep__item-actions">
+                <button className="btn btn--ghost prep__fix" onClick={(e) => { e.stopPropagation(); handleEdit(it); }}>
+                  수정
+                </button>
+                <button className="btn btn--primary prep__memo" onClick={(e) => { e.stopPropagation(); handleQuickMemo(it); }}>
+                  빠른 메모
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-        {creating && (
-          <PrepareNewInterview onClose={() => setCreating(false)} />
+        {filtered.length === 0 && (
+          <p className="prep__empty">검색된 면접이 없습니다.</p>
         )}
-      </div>
-    </div>
-  );
-};
 
-const PrepareNewInterview = ({ onClose }) => {
-  const navigate = useNavigate();
-  const [company, setCompany] = useState("");
-  const [role, setRole] = useState("");
-  const [date, setDate] = useState("");
-  const [type, setType] = useState("대면");
-  const [round, setRound] = useState("1차 면접");
-
-  const handleCreate = () => {
-    const id = `up-new-${Date.now()}`;
-    mockUpcoming.push({
-      id,
-      company,
-      role,
-      date,
-      type,
-      round,
-      status: "예정",
-    } || []);
-    onClose();
-    navigate("/interview-initial-info", { replace: true });
-  };
-
-  return (
-    <div className="prepare__modal-back" onClick={onClose}>
-      <div className="prepare__modal" onClick={(e) => e.stopPropagation()}>
-        <div className="prepare__modal-title">새 면접</div>
-        <div className="prepare__modal-sub">면접 기본 정보를 입력하세요.</div>
-
-        <div className="field">
-          <span className="t-chip">회사명</span>
-          <input
-            className="field__input"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="회사명"
-          />
-        </div>
-
-        <div className="field">
-          <span className="t-chip">직무</span>
-          <input
-            className="field__input"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder="직무"
-          />
-        </div>
-
-        <div className="field">
-          <span className="t-chip">면접일</span>
-          <input
-            className="field__input"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-
-        <div className="prepare__modal-row">
-          <div className="field">
-            <span className="t-chip">방식</span>
-            <select className="field__select" value={type} onChange={(e) => setType(e.target.value)}>
-              <option>대면</option>
-              <option>화상</option>
-              <option>전화</option>
-            </select>
-          </div>
-          <div className="field">
-            <span className="t-chip">회차</span>
-            <select className="field__select" value={round} onChange={(e) => setRound(e.target.value)}>
-              <option>1차 면접</option>
-              <option>2차 면접</option>
-              <option>3차 면접</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="prepare__modal-actions">
-          <button className="btn btn--ghost" onClick={onClose}>취소</button>
-          <button className="btn btn--teal" onClick={handleCreate}>저장</button>
-        </div>
+        <p className="prep__notice">면접을 마친 직후, 질문과 답변을 오염 없이 되짚어 보세요.</p>
       </div>
     </div>
   );
