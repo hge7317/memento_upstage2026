@@ -6,7 +6,7 @@ const InterviewInitialInfo = ({ session, setSession }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const editData = location.state?.edit;
-  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
+  const API_BASE = import.meta.env.VITE_API_BASE || "https://memento-upstage2026.vercel.app";
 
   const [company, setCompany] = useState(editData?.company || session?.company || "");
   const [role, setRole] = useState(editData?.role || session?.role || "");
