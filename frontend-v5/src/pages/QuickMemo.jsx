@@ -66,8 +66,8 @@ const QuickMemo = ({ session, setSession }) => {
 
           <div className="memo__photo-panel">
             <span className="memo__photo-title">사진으로 메모했나요?</span>
-            <span className="memo__photo-sub">사진에 남긴 메모도 함께 정리할 수 있어요</span>
-            <span className="memo__photo-limit">JPG · PNG 최대 5장</span>
+            <span className="memo__photo-sub">사진에 남긴 메모도<br />함께 정리할 수 있어요</span>
+            <span className="memo__photo-limit">JPG · PNG<br />최대 5장</span>
             <button className="memo__photo-btn" type="button">
               사진 추가
             </button>

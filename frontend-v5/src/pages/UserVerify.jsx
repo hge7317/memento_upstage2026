@@ -91,13 +91,21 @@ export default function UserVerify({ session, setSession }) {
     const showMain = true;
 
     const chipBg =
-      c.category === "FACT"
+      c.status === "UNKNOWN"
+        ? "var(--bg-warm)"
+        : c.status === "EDITED"
+        ? "var(--done-edit-bg)"
+        : c.category === "FACT"
         ? "var(--verify-fact-bg)"
         : c.category === "EVALUATION"
         ? "var(--verify-eval-bg)"
         : "var(--bg-warm)";
     const chipColor =
-      c.category === "FACT"
+      c.status === "UNKNOWN"
+        ? "var(--accent-warm)"
+        : c.status === "EDITED"
+        ? "var(--done-edit-ink)"
+        : c.category === "FACT"
         ? "var(--accent-teal)"
         : c.category === "EVALUATION"
         ? "var(--verify-eval-ink)"
@@ -168,21 +176,21 @@ export default function UserVerify({ session, setSession }) {
                     onClick={() => markUnknown(c.id)}
                     style={
                       c.status === "UNKNOWN"
-                        ? { background: "var(--bg-warm)", color: "var(--accent-warm)" }
+                        ? { background: "var(--accent-warm)", color: "var(--page-bg)" }
                         : { background: "var(--bg-warm)", color: "var(--accent-warm)" }
                     }
                   >
                     확실하지 않아요
                   </button>
                   <button
-                    className={`verify__btn verify__btn--edit ${c.status === "EDITED" ? "verify__btn--active" : ""}`}
+                    className={`verify__btn verify__btn--edit ${c.status === "EDITED" || isEditing ? "verify__btn--active" : ""}`}
                     onClick={() => {
                       setEditId(c.id);
                       setEditedClaim(c.claim || "");
                     }}
                     style={
-                      c.status === "EDITED"
-                        ? { background: "var(--page-bg)", color: "var(--muted)", borderColor: "var(--line)" }
+                      c.status === "EDITED" || isEditing
+                        ? { background: "var(--done-edit-bg)", color: "var(--done-edit-ink)", borderColor: "var(--done-edit-ink)", borderWidth: "2px" }
                         : { background: "var(--page-bg)", color: "var(--muted)", borderColor: "var(--line)" }
                     }
                   >
@@ -276,6 +284,8 @@ export default function UserVerify({ session, setSession }) {
 }
 
 function labelForChip(c) {
+  if (c.status === "UNKNOWN") return "UNCERTAIN · 불확실";
+  if (c.status === "EDITED") return "EDITED · 수정됨";
   if (c.category === "FACT") return "FACT · 사실 후보";
   if (c.category === "UNCERTAIN") return "UNCERTAIN · 불확실";
   if (c.category === "EVALUATION") return "EVALUATION · 평가";

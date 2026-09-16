@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 
 const mockUpcoming = [
@@ -46,21 +46,40 @@ const mockPast = [
 
 const PrepareInterview = ({ onStartInterview }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [tab, setTab] = useState("upcoming");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [deletedIds, setDeletedIds] = useState(new Set());
 
-  const filtered = (tab === "upcoming" ? mockUpcoming : mockPast)
-    .filter((it) => !deletedIds.has(it.id))
-    .filter((it) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      it.company.toLowerCase().includes(q) ||
-      it.role.toLowerCase().includes(q)
-    );
-  });
+  useEffect(() => {
+    if (location.state?.preInterviewSaved) {
+      setSavedUpcoming((prev) => {
+        if (prev.some((it) => it.id === location.state.preInterviewSaved.id)) {
+          return prev;
+        }
+        return [location.state.preInterviewSaved, ...prev];
+      });
+    }
+  }, [location.state]);
+
+  const [savedUpcoming, setSavedUpcoming] = useState([]);
+
+  const upcoming = [...mockUpcoming, ...savedUpcoming].filter((it) => !deletedIds.has(it.id));
+  const past = mockPast.filter((it) => !deletedIds.has(it.id));
+
+  const filtered =
+    tab === "upcoming"
+      ? upcoming.filter((it) => {
+          const q = search.trim().toLowerCase();
+          if (!q) return true;
+          return it.company.toLowerCase().includes(q) || it.role.toLowerCase().includes(q);
+        })
+      : past.filter((it) => {
+          const q = search.trim().toLowerCase();
+          if (!q) return true;
+          return it.company.toLowerCase().includes(q) || it.role.toLowerCase().includes(q);
+        });
 
   const handleQuickMemo = (it) => {
     onStartInterview?.({
@@ -117,7 +136,7 @@ const PrepareInterview = ({ onStartInterview }) => {
             className={`prep__tab ${tab === "upcoming" ? "prep__tab--active" : ""}`}
             onClick={() => setTab("upcoming")}
           >
-            예정 {mockUpcoming.length}
+            예정 {upcoming.length}
           </button>
           <button
             className={`prep__tab ${tab === "past" ? "prep__tab--active" : ""}`}

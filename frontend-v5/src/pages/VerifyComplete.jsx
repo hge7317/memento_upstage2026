@@ -10,26 +10,31 @@ function countStatus(candidates, status) {
 function detailItems(candidates) {
   if (!Array.isArray(candidates)) return [];
   return candidates
-    .filter((c) => c && (c.status === "CONFIRMED" || c.status === "EDITED" || c.status === "UNKNOWN"))
+    .filter((c) => c && (c.status === "CONFIRMED" || c.status === "EDITED" || c.status === "UNKNOWN" || c.status === "REJECTED"))
     .map((c) => ({
-      category: c.category,
+      status: c.status,
       text: c.status === "EDITED" && c.editedClaim ? c.editedClaim : c.claim,
     }));
 }
 
-function Badge({ category }) {
-  if (category === "FACT") {
+function StatusBadge({ status }) {
+  if (status === "CONFIRMED") {
     return (
       <span className="done__badge done__badge--fact">사실</span>
     );
   }
-  if (category === "UNCERTAIN") {
+  if (status === "EDITED") {
+    return (
+      <span className="done__badge done__badge--edit">수정</span>
+    );
+  }
+  if (status === "UNKNOWN") {
     return (
       <span className="done__badge done__badge--uncertain">불확실</span>
     );
   }
   return (
-    <span className="done__badge done__badge--eval">평가</span>
+    <span className="done__badge done__badge--excl">제외</span>
   );
 }
 
@@ -77,7 +82,7 @@ export default function VerifyComplete({ session, setSession }) {
           <div className="done__cards">
             <div className="done__card" style={{ background: "var(--verify-fact-bg)" }}>
               <div style={{ color: "var(--accent-teal)" }}>
-                <div className="done__card-label">확인</div>
+                <div className="done__card-label">사실</div>
                 <div className="done__card-num">{confirmed}</div>
               </div>
             </div>
@@ -110,7 +115,7 @@ export default function VerifyComplete({ session, setSession }) {
                 details.map((d, i) => (
                   <div key={i} className="done__detail-row">
                     <div className="done__detail-badge">
-                      <Badge category={d.category} />
+                      <StatusBadge status={d.status} />
                     </div>
                     <div className="done__detail-text">{d.text}</div>
                   </div>
