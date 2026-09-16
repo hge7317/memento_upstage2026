@@ -185,7 +185,7 @@ export default function RecallSteps({ session, setSession }) {
         },
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || "http://localhost:3001"}/api/recall`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE || "https://memento-upstage2026-ei4g.vercel.app/recall"}/api/recall`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
