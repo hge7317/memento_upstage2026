@@ -190,6 +190,17 @@ export default function RecallSteps({ session, setSession }) {
             url: session?.url,
           },
           previousAnswer: questionText,
+          recentMessages: [
+            ...(messages[current.id] || [])
+            .filter((m) => m && (m.role === "user" || m.role === "ai"))
+            .map((m) => ({
+              role: m.role,
+              text: m.text,
+            })),
+          ...(questionText
+            ? [{ role: "user", text: questionText }]
+            : []),
+          ].slice(-8),
         },
       });
 
