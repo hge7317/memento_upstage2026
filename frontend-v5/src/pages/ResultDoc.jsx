@@ -24,7 +24,7 @@ const ResultDoc = ({ result, onResultUpdate, onDeleteRecord }) => {
   if (!result) {
     return (
       <div className="screen screen--white result">
-        <Header />
+        <Header onLogoClick={() => navigate("/")} />
         <div className="result__body">
           <h2 className="result__title">기록을 찾을 수 없어요</h2>
         </div>
@@ -139,7 +139,7 @@ const ResultDoc = ({ result, onResultUpdate, onDeleteRecord }) => {
 
   return (
     <div className="screen screen--white result">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="result__body">
         <h2 className="result__title">{company} · {role} 면접</h2>
         <p className="result__meta">{date} · {type} · {round}</p>

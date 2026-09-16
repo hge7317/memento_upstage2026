@@ -49,8 +49,11 @@ const PrepareInterview = ({ onStartInterview }) => {
   const [tab, setTab] = useState("upcoming");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [deletedIds, setDeletedIds] = useState(new Set());
 
-  const filtered = (tab === "upcoming" ? mockUpcoming : mockPast).filter((it) => {
+  const filtered = (tab === "upcoming" ? mockUpcoming : mockPast)
+    .filter((it) => !deletedIds.has(it.id))
+    .filter((it) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -77,15 +80,31 @@ const PrepareInterview = ({ onStartInterview }) => {
     });
   };
 
+  const handleStartReplay = (it) => {
+    onStartInterview?.({
+      company: it.company,
+      role: it.role,
+      date: it.date,
+      type: it.type,
+      round: it.round,
+      stage: "recall",
+    });
+    navigate("/recall", { replace: true });
+  };
+
+  const handleDelete = (id) => {
+    setDeletedIds((prev) => new Set([...prev, id]));
+  };
+
   return (
     <div className="screen screen--white">
-      <Header onBack={() => navigate("/", { replace: true })} />
+      <Header onBack={() => navigate("/", { replace: true })} onLogoClick={() => navigate("/")} />
 
       <div className="prep__body">
         <div className="prep__head">
           <h2 className="t-title">준비 중인 면접</h2>
           <p className="t-sub">
-            면접을 선택하면 끝난 직후 바로 빠른 메모를 시작할 수 있어요.
+            면접을 누르면 정보를 수정할 수 있고, 끝난 직후엔 빠른 메모나 복기를 바로 시작할 수 있어요.
           </p>
         </div>
 
@@ -122,7 +141,10 @@ const PrepareInterview = ({ onStartInterview }) => {
             <div
               key={it.id}
               className={`prep__item ${selectedId === it.id ? "prep__item--selected" : ""}`}
-              onClick={() => setSelectedId(it.id)}
+              onClick={() => handleEdit(it)}
+              role="button"
+              tabIndex={0}
+              style={{ cursor: "pointer" }}
             >
               <div className="prep__item-chip">
                 <span className="prep__chip">{it.status === "예정" ? `D-${mockUpcoming.indexOf(it) + 1}` : "완료"}</span>
@@ -135,11 +157,14 @@ const PrepareInterview = ({ onStartInterview }) => {
                 </div>
               </div>
               <div className="prep__item-actions">
-                <button className="btn btn--ghost prep__fix" onClick={(e) => { e.stopPropagation(); handleEdit(it); }}>
-                  수정
-                </button>
                 <button className="btn btn--primary prep__memo" onClick={(e) => { e.stopPropagation(); handleQuickMemo(it); }}>
                   빠른 메모
+                </button>
+                <button className="btn btn--ghost prep__replay" onClick={(e) => { e.stopPropagation(); handleStartReplay(it); }}>
+                  복기 시작
+                </button>
+                <button className="btn btn--ghost" onClick={(e) => { e.stopPropagation(); handleDelete(it.id); }}>
+                  삭제
                 </button>
               </div>
             </div>
@@ -150,7 +175,6 @@ const PrepareInterview = ({ onStartInterview }) => {
           <p className="prep__empty">검색된 면접이 없습니다.</p>
         )}
 
-        <p className="prep__notice">면접을 마친 직후, 질문과 답변을 오염 없이 되짚어 보세요.</p>
       </div>
     </div>
   );

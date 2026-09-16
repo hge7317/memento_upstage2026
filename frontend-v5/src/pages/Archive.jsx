@@ -52,7 +52,7 @@ const Archive = ({ records = [], deleteRecord, onOpenRecord, onViewTrash }) => {
 
   return (
     <div className="screen screen--white archive">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="archive__body">
         <div className="archive__head">
           <div className="archive__head-left">

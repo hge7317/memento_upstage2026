@@ -6,6 +6,7 @@ const InterviewInitialInfo = ({ session, setSession }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const editData = location.state?.edit;
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
   const [company, setCompany] = useState(editData?.company || session?.company || "");
   const [role, setRole] = useState(editData?.role || session?.role || "");
@@ -15,10 +16,36 @@ const InterviewInitialInfo = ({ session, setSession }) => {
   const [url, setUrl] = useState(editData?.url || session?.url || "");
   const [memo, setMemo] = useState(editData?.memo || session?.memo || "");
   const [urlChecked, setUrlChecked] = useState(false);
+  const [loadingPosting, setLoadingPosting] = useState(false);
+  const [postingError, setPostingError] = useState(false);
 
-  const handleLoadPosting = () => {
+  const handleLoadPosting = async () => {
     if (!url) return;
-    setUrlChecked(true);
+    setLoadingPosting(true);
+    setPostingError(false);
+    try {
+      const res = await fetch(`${API_BASE}/api/job-posting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      let data = null;
+      if (res.ok) {
+        try { data = await res.json(); } catch { data = null; }
+      }
+      if (res.ok && data && data.ok === true) {
+        if (!company) setCompany(data.company || "");
+        if (!role) setRole(data.role || "");
+        setSession((s) => ({ ...s, jobPosting: data }));
+        setUrlChecked(true);
+      } else {
+        setPostingError(true);
+      }
+    } catch {
+      setPostingError(true);
+    } finally {
+      setLoadingPosting(false);
+    }
   };
 
   const handleSave = () => {
@@ -41,7 +68,7 @@ const InterviewInitialInfo = ({ session, setSession }) => {
 
   return (
     <div className="screen screen--white">
-      <Header onBack={() => navigate("/prepared")} />
+      <Header onBack={() => navigate("/prepared")} onLogoClick={() => navigate("/")} />
 
       <div className="pi02__body">
         <div className="pi02__head">
@@ -51,9 +78,8 @@ const InterviewInitialInfo = ({ session, setSession }) => {
               <span className="pi02__line" />
               <span className="pi02__dot pi02__dot--cyan" />
             </div>
-            <span className="pi02__brand">MEMENTO</span>
+            <span className="pi02__brand" onClick={() => navigate("/")}>MEMENTO</span>
           </div>
-          <span className="pi02__save-chip">저장 완료</span>
         </div>
 
         <h2 className="pi02__title">면접 전, 기억의 기준점을 준비해두세요</h2>
@@ -76,8 +102,9 @@ const InterviewInitialInfo = ({ session, setSession }) => {
             <button
               className={`pi02__load-btn ${urlChecked ? "pi02__load-btn--checked" : ""}`}
               onClick={handleLoadPosting}
+              disabled={loadingPosting}
             >
-              {urlChecked ? "확인됨" : "공고 불러오기"}
+              {loadingPosting ? "불러오는 중…" : postingError ? "읽을 수 없어요 · 직접 입력" : urlChecked ? "확인됨" : "공고 불러오기"}
             </button>
           </div>
         </div>

@@ -56,7 +56,7 @@ export default function VerifyComplete({ session, setSession }) {
 
   return (
     <div className="screen screen--white">
-      <Header title="후보 검증 완료" />
+      <Header title="후보 검증 완료" onLogoClick={() => navigate("/")} />
       <div className="done__page">
         <div className="done__inner">
           <h2 className="done__title">기억 후보를 모두 확인했어요</h2>

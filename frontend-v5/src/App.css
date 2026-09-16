@@ -88,7 +88,7 @@
   background: #ffffff;
   border-bottom: 1px solid var(--line);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -129,10 +129,13 @@
   font-size: 14px;
   letter-spacing: 0.02em;
   color: var(--ink);
+  cursor: pointer;
+  margin-top: 3px;
 }
 
 .header--dark .header__logo {
   color: #eef4f3;
+  cursor: pointer;
 }
 
 .save-chip {
@@ -439,6 +442,8 @@
   font-family: inherit;
   font-size: 12px;
   line-height: 1.4;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .field__input::placeholder,
@@ -974,7 +979,8 @@
 }
 
 .login__card {
-  margin: 0 auto;
+  margin: auto;
+  width: 100%;
   max-width: 560px;
   padding: 30px 28px;
   background: #ffffff;
@@ -1038,7 +1044,12 @@
   font-size: 9.8px;
   color: var(--auth-brand-sub);
   line-height: 1.5;
-  margin: 0 0 22px;
+  margin: 0 0 10px;
+}
+
+.login__sub--hint {
+  color: #B23B3B;
+  margin: 0 0 10px;
 }
 
 .login__submit {
@@ -1146,13 +1157,16 @@
 
 .prep__search {
   margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
 
 .prep__search-input {
   width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
   font-family: inherit;
   font-size: 12px;
   background: #ffffff;
@@ -1309,6 +1323,7 @@
   font-size: 10.5px;
   color: var(--ink);
   letter-spacing: 0.02em;
+  cursor: pointer;
 }
 
 .splash__meta {
@@ -1679,6 +1694,7 @@
 }
 
 .pi02__brand {
+  cursor: pointer;
   font-weight: 700;
   font-size: 10.5px;
   color: var(--ink);

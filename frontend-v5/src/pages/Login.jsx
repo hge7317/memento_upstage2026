@@ -37,7 +37,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="screen screen--dark">
-      <Header onBack={handBack} />
+      <Header onBack={handBack} onLogoClick={() => navigate("/")} />
 
       <div className="login__card">
         <div className="login__neuron" aria-hidden="true">
@@ -51,6 +51,9 @@ const Login = ({ onLogin }) => {
         <h2 className="login__title">면접 기록을 이어서 정리하세요</h2>
         <p className="login__sub">
           로그인하면 여러 면접의 사전 정보와 복기 기록을 안전하게 구분해 저장합니다.
+        </p>
+        <p className="login__sub login__sub--hint">
+          임의 비밀번호로 로그인 가능
         </p>
 
         <div className="field">

@@ -252,7 +252,7 @@ export default function RecallSteps({ session, setSession }) {
 
   return (
     <div className="screen screen--white recall">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="recall__header">
         <div className="recall__step-tag">{current.tag}</div>
         <div className="recall__count">{current.count}</div>

@@ -125,7 +125,7 @@ const TimelineReview = ({ record, session, onSave }) => {
 
   return (
     <div className="screen screen--white timeline">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="timeline__body">
         <div className="timeline__head">
           <h2 className="timeline__title">면접 타임라인을 확인해주세요</h2>

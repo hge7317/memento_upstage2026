@@ -49,6 +49,52 @@ p { margin: 0; }
 
 button { font-family: inherit; }
 
+/* ---------- 브랜드 헤더 ---------- */
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  padding: var(--s-sm) 0;
+  margin-bottom: var(--s-lg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.brand-header:focus-visible {
+  outline: none;
+}
+.brand-header .brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+}
+.brand-header .brand-name {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.28px;
+  color: var(--ink);
+  user-select: none;
+}
+.brand-header .brand-name::after {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background: var(--primary);
+  margin-left: var(--s-sm);
+  vertical-align: middle;
+  opacity: 0.5;
+}
+
 /* ---------- 앱 전체 ---------- */
 .app {
   background: var(--parchment);

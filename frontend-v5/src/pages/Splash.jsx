@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import Header from "../components/Header";
 import "../App.css";
 
 /* ---------- 뉴런 애니메이션: 일시정지/재생 토글 ---------- */
@@ -51,11 +52,7 @@ const Splash = ({ onStart }) => {
       <style>{NEURON_KEYFRAMES}</style>
 
       {/* ---- 상단 헤더 (트리: id51 패널 + id56 MEMENTO + id63 텍스트 + id57 칩) ---- */}
-      <header className="splash__topbar">
-        <div className="splash__logo">MEMENTO</div>
-        <div className="splash__meta">MEMORY / CONNECTION     01</div>
-        <span className="splash__save-chip">저장 완료</span>
-      </header>
+      <Header dark />
 
       {/* ---- 중앙 뉴런 디커 + 대형 memento 타이포 ---- */}
       <div className="splash__center" ref={neuronRef}>
@@ -121,10 +118,6 @@ const Splash = ({ onStart }) => {
             <br />
             오염 없이 되짚어 보세요.
           </div>
-        </div>
-        <div className="splash__footer-icons">
-          <button className="splash__footer-icon" onClick={togglePause}>Ⅱ</button>
-          <button className="splash__footer-icon" onClick={replay}>↻</button>
         </div>
       </footer>
     </div>
