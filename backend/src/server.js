@@ -1,5 +1,11 @@
 import express from "express";
 import { mockRecallQuestion } from "./mock-api.js";
+import {
+  buildMemoryReplaySystemPrompt,
+  normalizeStage,
+  getNextStage,
+  isRecallQuestionStage,
+} from "./memory-replay-skill.js";
 
 export const app = express();
 app.use(express.json());
