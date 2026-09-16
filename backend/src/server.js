@@ -67,285 +67,344 @@ async function callSolar(messages, maxTokens = 1024) {
   return content;
 }
 
-// POST /api/recall — 회상 질문 생성
+// POST /api/recall — Memory Replay SERVICE mode
 app.post("/api/recall", async (req, res) => {
-  const requestStage = req.body?.contextType || "recall";
-  try {
-    const { sessionId, context, contextType, questionCount = 1 } = req.body;
+  const {
+    sessionId,
+    context = {},
+    contextType,
+    stage: bodyStage,
+  } = req.body ?? {};
 
-    // Solar 호출 — 회상 질문 생성 프롬프트 (output-contract.md 준수)
-    const systemPrompt = `당신은 Memory Replay 서비스의 회상 질문 생성기입니다.
-사용자의 면접 기억을 구조적으로 끄집어내기 위한 질문 1개를 생성합니다.
-반드시 output-contract.md를 준수합니다.
-직접 답변에서 사용자가 기억 실패를 표현했는지 먼저 판단한 후 질문을 생성합니다.
-기억 실패가 확인되면 직전 질문과 동일한 질문을 생성해서는 안됩니다.
+  // 기존 프론트의 contextType과 새 SERVICE stage 둘 다 지원
+  const requestedStage = normalizeStage(bodyStage || contextType);
 
-## 핵심 규칙
-- 한 번에 회상 질문 1개만 생성합니다.
-- 질문은 구체적이고, 사용자가 제공하지 않은 고유명사를 추가하지 않습니다.
-- 한 장면/사건만 묻습니다.
-- 사용자의 원문/검증된 기억에 없는 내용을 주입하지 않습니다.
-- 불확실한 기억을 확정형으로 바꾸지 않습니다.
-- 평가·정답을 암시하지 않습니다.
-- REJECTED(이런 내용 없음) 후보를 질문 전제로 사용하지 않습니다.
-- 질문에 쓰는 구체 명사(사람·장소·물건·발언)는 반드시 "확인된 기억" 또는 "직전 답변"에 등장한 표현이어야 한다. 그 밖의 명사는 쓰지 않습니다.
-- 직전 사용자 답변(previousAnswer)을 다음 질문 생성의 최우선 단서로 사용합니다.
-- 직전 답변에 새로운 정보가 포함되어 있다면, 주제를 바꾸지 말고 그 정보의 구체적인 장면·행동·표정·말·감각을 떠올릴 수 있도록 한 단계 더 깊게 질문합니다.
-- 직전 답변에서 사용자가 언급한 사실을 임의로 확대하거나 다른 사건으로 바꾸지 않습니다.
-- 사용자가 기억 실패를 표현한 경우 같은 내용을 표현만 바꾸어 다시 묻지 않습니다. 장소, 시간, 사람, 표정, 소리, 행동 등 다른 회상 단서로 진행합니다.
-- 이미 사용자가 답한 내용을 다시 처음부터 묻지 않습니다.
-
-## 회상 실패 및 질문 전환 규칙
-- 사용자가 "기억이 안 난다.", "모르겠다.", "생각나지 않는다." 또는 이에 준하는 표현을 하면, 직전 질문의 내용을 다시 묻거나 표현만 바꿔 재질문하지 않습니다.
-- 사용자가 기억하지 못한다고 밝힌 사건·발언·질문은 이후 질문의 전제로 사용하지 않습니다.
-- 회상 실패가 발생하면 해당 단서를 즉시 포기하고 다른 범주로 전환합니다.
-- 같은 사건에 대한 질문을 연속 5회 이상 생성하지 않습니다.
-- 사용자가 새롭게 제공한 정보가 있다면, 그 정보를 우선적인 다음 회상 단서로 사용합니다.
-- 사용자가 "~하지 않았다." "~없었다.", "~아니었다."라고 명시한 내용은 발생하지 않은 사건으로 처리한다.
-- 발생하지 않았다고 명시된 사건이나 질문을 이후 회상 질문의 소재로 사용하지 않는다. 이와 관련된 예시로는 사용자:"코드 관련 질문은 없었다.", 잘못된 후속 질문1:"코드을 받았을때 분위기는 어땠나요?", 잘못된 후속 질문2:"코드 질문 없이 넘어갔을 때 어떤 느낌이었나요?", 올바른 후속 질문:"사용자가 실제로 있었다고 진술한 AI 활용 경험, 생성형 AI, 프로젝트 경험 등의 단서를 활용해 질문한다."
-- 사용자가 제공하지 않은 직무, 질문 유형, 사건을 임의로 추론하지 않는다.
-- 구체적인 발언 내용이 기억나지 않는 경우, 발언 내용을 억지로 회상시키지 말고 시간·공간·감각·행동 등 다른 종류의 단서로 이동합니다.
-
-# 최신 답변 우선 및 기억 정정 규칙
-
-- 직전 사용자 답변(previousAnswer)은 초기 interviewInfo보다 우선합니다.
-- 사용자의 최신 답변이 초기 정보와 다르거나 더 구체적인 경우, 최신 답변을 현재 사실로 사용합니다.
-- 사용자가 이전에 말한 내용을 수정하거나 정정하면 이전 내용을 더 이상 질문의 전제로 사용하지 않습니다.
-
-## 기억 실패 처리 규칙
-
-- 사용자가 특정 사건, 질문, 발언에 대해 "기억이 안 난다", "모르겠다", "생각나지 않는다" 등의 표현을 하면 해당 내용에 대한 직접 회상을 즉시 중단합니다.
-- 기억나지 않는 내용을 표현만 바꾸어 다시 질문하지 않습니다.
-- 기억 실패가 발생한 대상은 다음 질문의 중심 소재로 다시 사용하지 않습니다.
-- 대신 사용자가 직전 답변에서 새롭게 제공한 다른 사실이 있다면 그 사실을 우선적으로 탐색합니다.
-- 새로운 사실이 없다면 장소, 시간, 사람, 감각, 행동 등 완전히 다른 회상 단서로 전환합니다.
-
-예시:
-초기 정보: "자기소개 후 AI 활용 경험에 대해 질문받았다."
-최신 답변: "그 사이에 다른 질문이 있었는데 기억이 안 난다."
-
-잘못된 질문:
-"자기소개 후 AI 활용 경험 질문으로 넘어갔을 때 분위기가 어땠나요?"
-
-올바른 질문:
-"그 중간 질문의 내용 대신, 당시 면접관 중 누가 질문했는지나 질문을 들었을 때의 상황은 기억나나요?"
-
-단, 사용자가 해당 주변 정보도 기억나지 않는다고 하면 중간 질문에 대한 탐색을 중단하고 다른 사건으로 이동합니다.
-
-## 다음 질문 생성 우선순위
-
-다음 질문을 생성할 때 반드시 아래 우선순위를 따릅니다.
-
-1순위: 직전 답변에서 사용자가 새롭게 기억해낸 구체적인 사실
-2순위: 직전 답변과 연결되는 아직 탐색하지 않은 회상 단서
-3순위: 장소·시간·감각·행동 등 새로운 회상 단서
-
-사용자가 하나의 답변에서 기억 실패와 새로운 기억을 동시에 표현한 경우,
-새로운 기억을 반드시 우선합니다.
-
-예:
-사용자: "그건 기억이 안 나. 대신 한 면접관이 고개를 끄덕였던 건 기억나."
-
-잘못된 질문:
-"면접 장소의 분위기는 어땠나요?"
-"기억나지 않는 두 면접관은 어디를 보고 있었나요?"
-
-올바른 질문:
-"그 면접관이 고개를 끄덕였을 때, 어떤 이야기를 하고 있었는지는 기억나나요?"
-
-즉, "기억 안 남"은 해당 단서를 버리라는 신호이고,
-"대신 기억나는 새로운 사실"은 다음 질문의 최우선 단서입니다.
-
-## 출력 형식
-반드시 유효한 JSON으로만 응답합니다. Markdown 코드 펜스(\`\`\`)를 붙이지 않습니다.
-output-contract.md의 공통 응답 필드를 따릅니다.
-
-공통 응답 예시:
-{
-  "stage": "<요청된 단계>",
-  "nextStage": "<완료 조건에 따른 제안 단계>",
-  "assistantMessage": "사용자에게 표시할 짧은 안내 (질문과 중복되지 않음)",
-  "question": "회상 질문 하나",
-  "candidateItems": [],
-  "newMemoryItems": [],
-  "objectiveFieldRequest": [],
-  "timeline": [],
-  "evaluations": [],
-  "openGaps": [],
-  "canFinishNow": true,
-  "safety": {
-    "injectionCheckPassed": true,
-    "rejectedPremiseUsed": false,
-    "multipleRecallQuestions": false,
-    "certaintyPreserved": true,
-    "blockedReason": null
-  },
-  "audit": {
-    "questionSource": "<단서 범주: STRUCTURAL_TIME | STRUCTURAL_SPACE_SENSORY | STRUCTURAL_ACTION | FREE_RECALL | REVERSE_RECALL | CONTEXT_REINSTATEMENT>",
-    "memoryItemsAdded": 0,
-    "assumptions": []
-  }
-}
-
-## 단계별 응답 제한
-- CONTEXT_REINSTATEMENT: question 하나만 포함, 나머지는 null/빈 배열
-- FREE_RECALL: question 하나 포함, 나머지는 null/빈 배열
-- REVERSE_RECALL: question 하나, newMemoryItems(새 기억 구조화 시)
-
-## safety 필드 규칙
-- injectionCheckPassed: 미언급 구체 명사, 거절 전제, 복수 질문, 평가·정답 암시 검사를 통과한 경우 true
-- 검사를 실행하지 않았거나 판정할 수 없으면 true로 두지 않습니다.
-- blockedReason: 질문을 만들지 않는 단계에서는 "NOT_APPLICABLE" 사용 가능
-
-questionSource는 질문의 출처 범주를 나타냅니다:
-- CONTEXT_REINSTATEMENT: "CONTEXT_REINSTATEMENT"
-- FREE_RECALL: "FREE_RECALL"
-- REVERSE_RECALL: "REVERSE_RECALL"
-- STRUCTURAL_CUE 시간 단서: "STRUCTURAL_TIME"
-- STRUCTURAL_CUE 공간·감각 단서: "STRUCTURAL_SPACE_SENSORY"
-- STRUCTURAL_CUE 행동 단서: "STRUCTURAL_ACTION"
-`;
-
-    const userPrompt = `다음 세션 정보를 바탕으로 회상 질문을 생성해 주세요.
-
-요청 단계: ${contextType}
-확인된 기억(이 목록에 있는 표현만 질문에 쓸 수 있음):
-${(context?.confirmedItems ?? []).map((s,i)=>`${i+1}. ${s}`).join("\n") || "없음"}
-거절된 내용(질문·전제에 절대 사용 금지):
-${(context?.rejectedItems ?? []).map(s=>`- ${s}`).join("\n") || "없음"}
-
-면접 기본 정보(배경으로만): ${JSON.stringify(context?.interviewInfo ?? {})}
-직전 답변: ${context?.previousAnswer || "없음"}
-
-최근 회상 대화:
-${(context?.recentMessages ?? [])
-  .map((m) => `${m.role === "user" ? "사용자" : "회상 질문"}: ${m.text}`)
-  .join("\n") || "없음"}
-
-참고: 면접 기본 정보(회사, 직무, 일시, 방식, 단계, 면접관 수)가 있으면 배경으로만 참고하고 잡포스팅 URL이 있으면 배경 맥락으로만 참고합니다. 공고 내용을 실제 면접 질문/사건으로 전제하지 않습니다.
-
-위 컨텍스트에 없는 고유명사를 질문에 추가하지 마세요.
-
-반드시 JSON으로만 응답하세요. Markdown 코드 펜스를 붙이지 마세요.`;
-
-    const solarMessages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ];
-
-    const solarContent = await callSolar(solarMessages, 1536);
-
-    // Solar 응답 파싱 — output-contract.md 공통 응답 JSON
-    let parsed = null;
-    try {
-      const jsonMatch = solarContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      }
-    } catch (parseError) {
-      console.error("Solar JSON 파싱 실패:", parseError.message);
-    }
-
-    if (parsed && typeof parsed.question === "string") {
-      const rejected = context?.rejectedItems ?? [];
-      const hit = rejected.find(r => r && parsed.question.includes(r));
-      if (hit) { parsed.question = "그다음에 기억나는 것은 무엇인가요?"; parsed.safety = { ...(parsed.safety||{}), injectionCheckPassed:false, blockedReason:"REJECTED_PREMISE" }; }
-      const response = {
-        stage: requestStage.toUpperCase().replace(/-/g, "_"),
-        nextStage: requestStage === "context-reinstatement" ? "FREE_RECALL"
-          : requestStage === "free-recall" ? "STRUCTURAL_CUE"
-          : "TIMELINE_REVIEW",
-        assistantMessage: parsed.assistantMessage || "회상 질문을 준비했습니다.",
-        question: parsed.question,
-        candidateItems: parsed.candidateItems || [],
-        newMemoryItems: parsed.newMemoryItems || [],
-        objectiveFieldRequest: parsed.objectiveFieldRequest || [],
-        timeline: parsed.timeline || [],
-        evaluations: parsed.evaluations || [],
-        openGaps: parsed.openGaps || [],
-        canFinishNow: parsed.canFinishNow ?? true,
-        safety: parsed.safety || {
-          injectionCheckPassed: true,
-          rejectedPremiseUsed: false,
-          multipleRecallQuestions: false,
-          certaintyPreserved: true,
-          blockedReason: null,
-        },
-        audit: parsed.audit || {
-          questionSource: requestStage === "context-reinstatement" ? "CONTEXT_REINSTATEMENT"
-            : requestStage === "free-recall" ? "FREE_RECALL"
-            : "REVERSE_RECALL",
-          memoryItemsAdded: 0,
-          assumptions: [],
-        },
-      };
-      res.json(response);
-    } else {
-      console.error("Solar 응답이 output-contract.md 형식을 준수하지 않음, mock 폴백 사용");
-      res.json({
-        stage: requestStage.toUpperCase().replace(/-/g, "_"),
-        nextStage: requestStage === "context-reinstatement" ? "FREE_RECALL"
-          : requestStage === "free-recall" ? "STRUCTURAL_CUE"
-          : "TIMELINE_REVIEW",
-        assistantMessage: "회상 질문을 준비했습니다.",
-        question: mockRecallQuestion.question,
-        candidateItems: [],
-        newMemoryItems: [],
-        objectiveFieldRequest: [],
-        timeline: [],
-        evaluations: [],
-        openGaps: [],
-        canFinishNow: true,
-        safety: {
-          injectionCheckPassed: mockRecallQuestion.injectionCheck?.passed ?? true,
-          rejectedPremiseUsed: false,
-          multipleRecallQuestions: false,
-          certaintyPreserved: true,
-          blockedReason: null,
-        },
-        audit: {
-          questionSource: requestStage === "context-reinstatement" ? "CONTEXT_REINSTATEMENT"
-            : requestStage === "free-recall" ? "FREE_RECALL"
-            : "REVERSE_RECALL",
-          memoryItemsAdded: 0,
-          assumptions: [],
-        },
-        source: "MOCK_FALLBACK",
-        sessionId: req.body?.sessionId || "session-demo",
-      });
-    }
-  } catch (error) {
-    console.error("Solar call failed, using mock fallback:", error.message);
-    res.json({
-      stage: requestStage.toUpperCase().replace(/-/g, "_"),
-      nextStage: requestStage === "context-reinstatement" ? "FREE_RECALL"
-        : requestStage === "free-recall" ? "STRUCTURAL_CUE"
-        : "TIMELINE_REVIEW",
-      assistantMessage: "회상 질문을 준비했습니다.",
-      question: mockRecallQuestion.question,
+  // SERVICE에서는 stage를 추정하지 않음
+  if (!requestedStage) {
+    return res.status(400).json({
+      stage: null,
+      assistantMessage: "",
+      question: null,
       candidateItems: [],
-      newMemoryItems: [],
-      objectiveFieldRequest: [],
-      timeline: [],
+      memoryItems: [],
       evaluations: [],
       openGaps: [],
-      canFinishNow: true,
+      resultMarkdown: null,
+      nextStageProposal: null,
       safety: {
-        injectionCheckPassed: mockRecallQuestion.injectionCheck?.passed ?? true,
+        injectionCheckPassed: null,
         rejectedPremiseUsed: false,
-        multipleRecallQuestions: false,
-        certaintyPreserved: true,
-        blockedReason: null,
       },
-      audit: {
-        questionSource: requestStage === "context-reinstatement" ? "CONTEXT_REINSTATEMENT"
-          : requestStage === "free-recall" ? "FREE_RECALL"
-          : "REVERSE_RECALL",
-        memoryItemsAdded: 0,
-        assumptions: [],
+      error: {
+        code: "INVALID_STAGE",
+        message: "현재 Memory Replay 서비스 단계가 없거나 올바르지 않습니다.",
       },
-      source: "MOCK_FALLBACK",
-      sessionId: req.body?.sessionId || "session-demo",
+    });
+  }
+
+  try {
+    // memory-replay Skill의 SERVICE 규칙 로드
+    const systemPrompt = buildMemoryReplaySystemPrompt(requestedStage);
+
+    const confirmedItems = context?.confirmedItems ?? [];
+    const rejectedItems = context?.rejectedItems ?? [];
+    const recentMessages = context?.recentMessages ?? [];
+
+    const userPrompt = `
+executionMode: SERVICE
+stage: ${requestedStage}
+
+아래는 서비스 실행기가 전달한 현재 세션 정보입니다.
+현재 stage의 작업만 수행하세요.
+
+[확인된 기억]
+${
+  confirmedItems.length
+    ? confirmedItems.map((item, i) => `${i + 1}. ${item}`).join("\n")
+    : "없음"
+}
+
+[거절된 내용]
+${
+  rejectedItems.length
+    ? rejectedItems.map((item) => `- ${item}`).join("\n")
+    : "없음"
+}
+
+[면접 기본 정보]
+${JSON.stringify(context?.interviewInfo ?? {})}
+
+[직전 사용자 답변]
+${context?.previousAnswer || "없음"}
+
+[최근 회상 대화]
+${
+  recentMessages.length
+    ? recentMessages
+        .filter(
+          (message) =>
+            message &&
+            (message.role === "user" || message.role === "ai")
+        )
+        .map(
+          (message) =>
+            `${message.role === "user" ? "사용자" : "회상 질문"}: ${
+              message.text
+            }`
+        )
+        .join("\n")
+    : "없음"
+}
+
+[서비스 상태 정보]
+검토 완료 여부: ${context?.reviewConfirmed ?? false}
+준비자료 대조 동의: ${context?.comparisonConsent ?? false}
+
+중요:
+- 위 정보에 없는 사건을 만들지 마세요.
+- rejectedItems의 내용을 질문의 전제로 사용하지 마세요.
+- 최신 사용자 답변이 이전 정보보다 우선합니다.
+- 현재 stage를 변경하지 마세요.
+- nextStageProposal은 제안일 뿐입니다.
+- 반드시 SERVICE 응답 계약의 JSON 객체 하나만 반환하세요.
+`.trim();
+
+    const solarContent = await callSolar(
+      [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+      requestedStage === "GENERATE_OUTPUT" ? 4096 : 1536
+    );
+
+    // Solar JSON 파싱
+    let parsed;
+
+    try {
+      const cleaned = solarContent
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      parsed = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error(
+        "Memory Replay JSON parsing failed:",
+        parseError.message
+      );
+
+      return res.status(502).json({
+        stage: requestedStage,
+        assistantMessage: "",
+        question: null,
+        candidateItems: [],
+        memoryItems: [],
+        evaluations: [],
+        openGaps: [],
+        resultMarkdown: null,
+        nextStageProposal: requestedStage,
+        safety: {
+          injectionCheckPassed: null,
+          rejectedPremiseUsed: false,
+        },
+        error: {
+          code: "INVALID_MODEL_RESPONSE",
+          message:
+            "Memory Replay 응답 형식을 확인하지 못했습니다. 같은 단계에서 다시 시도해 주세요.",
+        },
+      });
+    }
+
+    // 모델이 현재 stage를 바꾸면 거부
+    const responseStage = normalizeStage(parsed?.stage);
+
+    if (responseStage !== requestedStage) {
+      return res.status(502).json({
+        stage: requestedStage,
+        assistantMessage: "",
+        question: null,
+        candidateItems: [],
+        memoryItems: [],
+        evaluations: [],
+        openGaps: [],
+        resultMarkdown: null,
+        nextStageProposal: requestedStage,
+        safety: {
+          injectionCheckPassed: null,
+          rejectedPremiseUsed: false,
+        },
+        error: {
+          code: "STAGE_MISMATCH",
+          message:
+            "Memory Replay 응답 단계가 현재 서비스 단계와 일치하지 않습니다.",
+        },
+      });
+    }
+
+    // 회상 단계에서는 질문 하나가 반드시 필요
+    if (
+      isRecallQuestionStage(requestedStage) &&
+      (typeof parsed.question !== "string" ||
+        parsed.question.trim() === "")
+    ) {
+      return res.status(502).json({
+        stage: requestedStage,
+        assistantMessage: "",
+        question: null,
+        candidateItems: [],
+        memoryItems: [],
+        evaluations: [],
+        openGaps: [],
+        resultMarkdown: null,
+        nextStageProposal: requestedStage,
+        safety: parsed?.safety ?? {
+          injectionCheckPassed: null,
+          rejectedPremiseUsed: false,
+        },
+        error: {
+          code: "QUESTION_REQUIRED",
+          message:
+            "현재 회상 단계에서 질문이 생성되지 않았습니다. 같은 단계에서 다시 시도해 주세요.",
+        },
+      });
+    }
+
+    // 회상 단계가 아닌데 질문을 생성했다면 제거
+    const question = isRecallQuestionStage(requestedStage)
+      ? parsed.question.trim()
+      : null;
+
+    // rejected premise 간단한 서버 측 2차 검사
+    const rejectedPremise = rejectedItems.find(
+      (item) =>
+        typeof item === "string" &&
+        item.trim() &&
+        question?.includes(item.trim())
+    );
+
+    if (rejectedPremise) {
+      return res.status(502).json({
+        stage: requestedStage,
+        assistantMessage: "",
+        question: null,
+        candidateItems: parsed?.candidateItems ?? [],
+        memoryItems: parsed?.memoryItems ?? [],
+        evaluations: parsed?.evaluations ?? [],
+        openGaps: parsed?.openGaps ?? [],
+        resultMarkdown: parsed?.resultMarkdown ?? null,
+        nextStageProposal: requestedStage,
+        safety: {
+          ...(parsed?.safety ?? {}),
+          injectionCheckPassed: false,
+          rejectedPremiseUsed: true,
+        },
+        error: {
+          code: "REJECTED_PREMISE_USED",
+          message:
+            "거절된 기억이 질문의 전제로 사용되어 응답을 폐기했습니다.",
+        },
+      });
+    }
+
+    /*
+     * 모델은 다음 단계를 제안할 수 있지만
+     * 실제 허용되는 다음 단계는 서버의 flow 기준으로 제한
+     */
+    const allowedNextStage = getNextStage(requestedStage);
+
+    const proposedStage = normalizeStage(
+      parsed?.nextStageProposal
+    );
+
+    const nextStageProposal =
+      proposedStage === requestedStage ||
+      proposedStage === allowedNextStage
+        ? proposedStage
+        : requestedStage;
+
+    // 최종 SERVICE response
+    return res.json({
+      stage: requestedStage,
+
+      assistantMessage:
+        typeof parsed?.assistantMessage === "string"
+          ? parsed.assistantMessage
+          : "",
+
+      question,
+
+      candidateItems: Array.isArray(parsed?.candidateItems)
+        ? parsed.candidateItems
+        : [],
+
+      memoryItems: Array.isArray(parsed?.memoryItems)
+        ? parsed.memoryItems
+        : [],
+
+      evaluations: Array.isArray(parsed?.evaluations)
+        ? parsed.evaluations
+        : [],
+
+      openGaps: Array.isArray(parsed?.openGaps)
+        ? parsed.openGaps
+        : [],
+
+      resultMarkdown:
+        typeof parsed?.resultMarkdown === "string"
+          ? parsed.resultMarkdown
+          : null,
+
+      nextStageProposal,
+
+      safety: {
+        injectionCheckPassed:
+          typeof parsed?.safety?.injectionCheckPassed === "boolean"
+            ? parsed.safety.injectionCheckPassed
+            : null,
+
+        rejectedPremiseUsed:
+          parsed?.safety?.rejectedPremiseUsed === true,
+      },
+
+      error: parsed?.error ?? null,
+
+      sessionId: sessionId || null,
+    });
+  } catch (error) {
+    console.error("Memory Replay failed:", error.message);
+
+    /*
+     * 중요:
+     * Skill 실행 실패를 mock 질문으로 숨기지 않는다.
+     * 같은 stage를 유지하고 재시도 가능하게 반환한다.
+     */
+    return res.status(500).json({
+      stage: requestedStage,
+      assistantMessage: "",
+      question: null,
+      candidateItems: [],
+      memoryItems: [],
+      evaluations: [],
+      openGaps: [],
+      resultMarkdown: null,
+      nextStageProposal: requestedStage,
+      safety: {
+        injectionCheckPassed: null,
+        rejectedPremiseUsed: false,
+      },
+      error: {
+        code: "MEMORY_REPLAY_ERROR",
+        message:
+          "Memory Replay 처리 중 오류가 발생했습니다. 같은 단계에서 다시 시도해 주세요.",
+      },
+      sessionId: sessionId || null,
     });
   }
 });
