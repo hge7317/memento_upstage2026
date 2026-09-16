@@ -104,6 +104,14 @@ export default function RecallSteps({ session, setSession }) {
               url: session?.url,
             },
             previousAnswer: previousUserMessage(messages, current.id),
+
+           recentMessages: (messages[current.id] || [])
+            .filter((m) => m && (m.role === "user" || m.role === "ai"))
+            .slice(-8)
+            .map((m) => ({
+              role: m.role,
+              text: m.text,
+            })),
           },
         });
 
