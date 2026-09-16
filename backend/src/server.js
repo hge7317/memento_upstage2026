@@ -277,3 +277,5 @@ if (process.env.VERCEL !== "1") {
     console.log(`Solar Pro 4: ${SOLAR_API_KEY ? "configured" : "NOT CONFIGURED — using mock fallback"}`);
   });
 }
+
+export default app;
