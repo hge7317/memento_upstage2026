@@ -87,7 +87,7 @@ export default function RecallSteps({ session, setSession }) {
     (async () => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+        const timeout = setTimeout(() => controller.abort(), 30000);
 
         const body = JSON.stringify({
           sessionId: session?.sessionId,
@@ -107,7 +107,7 @@ export default function RecallSteps({ session, setSession }) {
           },
         });
 
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || "http://localhost:3001"}/api/recall`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || "https://memento-upstage2026-ei4g.vercel.app/recall"}/api/recall`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body,
@@ -165,7 +165,7 @@ export default function RecallSteps({ session, setSession }) {
     setLoading(true);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
+      const timeout = setTimeout(() => controller.abort(), 30000);
 
       const body = JSON.stringify({
         sessionId: session?.sessionId,
@@ -185,7 +185,7 @@ export default function RecallSteps({ session, setSession }) {
         },
       });
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || "http://localhost:3001"}/api/recall`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE || "https://memento-upstage2026-ei4g.vercel.app/recall"}/api/recall`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
