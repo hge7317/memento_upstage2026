@@ -16,6 +16,7 @@ const QuickMemo = ({ session, setSession }) => {
 
   const handleSave = () => {
     setSession((s) => ({ ...s, quickMemo: text }));
+    navigate("/prepared", { replace: true });
   };
 
   const handleComplete = () => {

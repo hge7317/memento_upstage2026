@@ -34,8 +34,18 @@ const InterviewInitialInfo = ({ session, setSession }) => {
         try { data = await res.json(); } catch { data = null; }
       }
       if (res.ok && data && data.ok === true) {
-        if (!company) setCompany(data.company || "");
-        if (!role) setRole(data.role || "");
+        if (!company && data.company) setCompany(data.company);
+        if (!role && data.role) setRole(data.role);
+        {
+          const lines = [];
+          if (data.summary) lines.push(data.summary);
+          if (Array.isArray(data.requirements) && data.requirements.length) {
+            lines.push("주요 요구사항: " + data.requirements.join(" / "));
+          }
+          if (data.employmentType) lines.push("고용형태: " + data.employmentType);
+          if (data.location) lines.push("근무지: " + data.location);
+          if (lines.length) setMemo(lines.join("\n"));
+        }
         setSession((s) => ({ ...s, jobPosting: data }));
         setUrlChecked(true);
       } else {
