@@ -35,9 +35,9 @@ export const Category = {
 };
 
 export const CATEGORY_LABEL = {
-  fact: "FACT",
-  uncertain: "UNCERTAIN",
-  evaluation: "EVALUATION",
+  fact: "사실",
+  uncertain: "불확실",
+  evaluation: "수정",
 };
 
 export const CATEGORY_COLOR = {
