@@ -23,9 +23,9 @@ const STEPS = [
     id: "structural-cue",
     tag: "STEP 3 · 시간·공간·감각·행동 단서",
     count: "회상 3 / 4",
-    question: "코드 질문을 받을 때, 어디에 앉아 있었고 시선은 어디를 향했나요?",
+    question: "그다음에 기억나는 장면이나 행동이 있나요?",
     placeholder: "단서를 따라 떠오르는 내용을 입력하세요",
-    fallback: "코드 질문을 받을 때, 어디에 앉아 있었고 시선은 어디를 향했나요?",
+    fallback: "그다음에 기억나는 장면이나 행동이 있나요?",
   },
   {
     id: "reverse-recall",
