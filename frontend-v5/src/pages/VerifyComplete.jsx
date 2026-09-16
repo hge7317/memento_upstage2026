@@ -86,16 +86,16 @@ export default function VerifyComplete({ session, setSession }) {
                 <div className="done__card-num">{confirmed}</div>
               </div>
             </div>
-            <div className="done__card" style={{ background: "var(--done-edit-bg)" }}>
-              <div style={{ color: "var(--done-edit-ink)" }}>
-                <div className="done__card-label">수정</div>
-                <div className="done__card-num">{edited}</div>
-              </div>
-            </div>
             <div className="done__card" style={{ background: "var(--bg-warm)" }}>
               <div style={{ color: "var(--accent-warm)" }}>
                 <div className="done__card-label">불확실</div>
                 <div className="done__card-num">{unknown}</div>
+              </div>
+            </div>
+            <div className="done__card" style={{ background: "var(--done-edit-bg)" }}>
+              <div style={{ color: "var(--done-edit-ink)" }}>
+                <div className="done__card-label">수정</div>
+                <div className="done__card-num">{edited}</div>
               </div>
             </div>
             <div className="done__card" style={{ background: "var(--done-exclude-bg)" }}>

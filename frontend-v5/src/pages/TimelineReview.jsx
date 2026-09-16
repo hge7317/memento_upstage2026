@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
 const CATEGORIES = ["FACT", "UNCERTAIN", "EVALUATION"];
+const CATEGORY_LABELS = { FACT: "사실", UNCERTAIN: "불확실", EVALUATION: "수정" };
 
 const TimelineReview = ({ record, session, onSave }) => {
   const navigate = useNavigate();
@@ -163,7 +164,7 @@ const TimelineReview = ({ record, session, onSave }) => {
                         >
                           {CATEGORIES.map((c) => (
                             <option key={c} value={c}>
-                              {c}
+                              {CATEGORY_LABELS[c] || c}
                             </option>
                           ))}
                         </select>
@@ -186,7 +187,7 @@ const TimelineReview = ({ record, session, onSave }) => {
                       </div>
                     ) : (
                       <>
-                        <span className={`timeline__tag ${tagClass(it.tag)}`}>{it.tag}</span>
+                        <span className={`timeline__tag ${tagClass(it.tag)}`}>{CATEGORY_LABELS[it.tag] || it.tag}</span>
                         <span className="timeline__content">{it.content}</span>
                         <button
                           type="button"
