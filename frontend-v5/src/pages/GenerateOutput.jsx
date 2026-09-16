@@ -33,7 +33,7 @@ const GenerateOutput = ({ session, setSession }) => {
 
   return (
     <div className="screen screen--white generate">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="generate__body">
         <div className="generate__card">
           <div className="generate__icon">DOC</div>

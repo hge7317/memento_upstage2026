@@ -216,6 +216,7 @@ export default function UserVerify({ session, setSession }) {
       <Header
         onBack={() => navigate("/quick-memo")}
         title="후보 검증"
+        onLogoClick={() => navigate("/")}
       />
       <div className="verify__body">
         <div className="verify__top">

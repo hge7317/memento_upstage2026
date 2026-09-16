@@ -161,14 +161,12 @@ function App() {
       <Route
         path="/"
         element={
-          session ? <Navigate to="/login" replace /> : (
-            <Splash
-              onStart={(dest) => {
-                sessionStorage.setItem("memento.dest", dest);
-                navigate("/login");
-              }}
-            />
-          )
+          <Splash
+            onStart={(dest) => {
+              sessionStorage.setItem("memento.dest", dest);
+              navigate("/login");
+            }}
+          />
         }
       />
       <Route

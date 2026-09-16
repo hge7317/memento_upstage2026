@@ -30,7 +30,7 @@ const Trash = ({ records = [], restoreRecord, onViewArchive }) => {
 
   return (
     <div className="screen screen--white bin">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
       <div className="bin__body">
         <h2 className="bin__title">휴지통</h2>
         <p className="bin__sub">삭제한 기록은 30일 동안 복구할 수 있어요.</p>

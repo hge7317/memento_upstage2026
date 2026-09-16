@@ -33,7 +33,7 @@ const ExtractCandidates = ({ session, setSession }) => {
 
   return (
     <div className="screen screen--white">
-      <Header />
+      <Header onLogoClick={() => navigate("/")} />
 
       <div className="extract__body">
         <div className="extract__sheet-header">
@@ -43,7 +43,6 @@ const ExtractCandidates = ({ session, setSession }) => {
             <span className="extract__dot extract__dot--cyan" />
           </div>
           <span className="extract__brand">MEMENTO</span>
-          <span className="save-chip">저장 완료</span>
         </div>
 
         <h2 className="extract__title">메모를 차분히 정리하고 있어요</h2>

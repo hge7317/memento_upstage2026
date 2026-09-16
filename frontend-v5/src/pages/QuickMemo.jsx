@@ -16,6 +16,7 @@ const QuickMemo = ({ session, setSession }) => {
 
   const handleSave = () => {
     setSession((s) => ({ ...s, quickMemo: text }));
+    navigate("/prepared", { replace: true });
   };
 
   const handleComplete = () => {
@@ -33,12 +34,11 @@ const QuickMemo = ({ session, setSession }) => {
 
   return (
     <div className="screen screen--white">
-      <Header onBack={() => navigate("/prepared")} />
+      <Header onBack={() => navigate("/prepared")} onLogoClick={() => navigate("/")} />
 
       <div className="memo__body">
         <div className="memo__head">
           <span className="memo__title">지금 떠오르는 것부터 남겨보세요</span>
-          <span className="save-chip">저장 완료</span>
         </div>
         <p className="memo__sub">순서가 틀려도, 확실하지 않아도 괜찮아요.</p>
 
