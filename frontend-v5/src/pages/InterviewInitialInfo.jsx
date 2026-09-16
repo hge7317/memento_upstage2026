@@ -59,6 +59,17 @@ const InterviewInitialInfo = ({ session, setSession }) => {
   };
 
   const handleSave = () => {
+    const entry = {
+      id: `prepared-${Date.now()}`,
+      company,
+      role,
+      date,
+      type,
+      round,
+      memo,
+      url,
+    };
+
     setSession((s) => ({
       ...s,
       company,
@@ -68,8 +79,10 @@ const InterviewInitialInfo = ({ session, setSession }) => {
       round,
       url,
       memo,
+      savedPreInterview: entry,
     }));
-    navigate("/prepared", { replace: true });
+
+    navigate("/prepared", { state: { preInterviewSaved: entry } });
   };
 
   const handleCancel = () => {

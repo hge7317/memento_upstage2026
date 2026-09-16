@@ -1956,7 +1956,8 @@
 }
 
 .memo__grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -1998,7 +1999,8 @@
 }
 
 .memo__photo-panel {
-  flex: 0 0 399px;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -2529,6 +2531,11 @@
   border-color: var(--line);
   text-align: center;
 }
+.verify__btn--edit {
+  background: var(--done-edit-bg);
+  color: var(--done-edit-ink);
+  border-color: var(--done-edit-bg);
+}
 
 .verify__btn--dismiss {
   width: 156px;
@@ -2767,6 +2774,14 @@
 .done__badge--eval {
   background: var(--bg-chip);
   color: var(--accent-teal);
+}
+.done__badge--edit {
+  background: var(--done-edit-bg);
+  color: var(--done-edit-ink);
+}
+.done__badge--excl {
+  background: var(--done-exclude-bg);
+  color: var(--done-exclude-ink);
 }
 .done__detail-text {
   flex: 1;
@@ -3154,3 +3169,14 @@
 .bin__empty { padding: 60px 0; text-align: center; font-size: 22px; color: var(--muted); }
 .bin__actions { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 32px; }
 .bin__back { width: 241px; height: 65px; border-radius: 15px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 22px; font-weight: 700; cursor: pointer; }
+
+/* ===== S02 빠른 메모 — 메모 박스/사진 패널 겹침 보정 ===== */
+.memo__grid { display: grid; grid-template-columns: 864fr 406fr; column-gap: 31px; align-items: stretch; margin-bottom: 25px; }
+.memo__textarea-wrap { position: relative; min-width: 0; display: block; height: 294px; }
+.memo__textarea { box-sizing: border-box; width: 100%; height: 294px; max-height: none; padding: 20px 24px 44px; border: 1px solid var(--line); border-radius: 19px; font-size: 20px; line-height: 1.5; resize: none; }
+.memo__count { position: absolute; right: 24px; bottom: 16px; font-size: 17px; color: var(--muted); }
+.memo__photo-panel { box-sizing: border-box; min-width: 0; width: 100%; height: 294px; padding: 40px 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 19px; }
+.memo__photo-title { font-size: 20px; font-weight: 700; color: var(--ink-2); margin: 0 0 8px; white-space: nowrap; }
+.memo__photo-sub { font-size: 15px; color: var(--muted); margin: 0 0 10px; }
+.memo__photo-limit { height: 40px; padding: 0 24px; border-radius: 20px; background: var(--bg-chip); color: var(--accent-teal); font-size: 19px; font-weight: 700; display: inline-flex; align-items: center; margin: 0 0 12px; }
+.memo__photo-btn { width: 200px; height: 46px; border-radius: 16px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 20px; font-weight: 700; cursor: pointer; }

@@ -123,22 +123,27 @@ export function extractCandidates({
   };
 }
 
-/** 문장을 의미 단위로 나눈다. */
+/** 문장을 의미 단위로 나눈다. 줄바꿈이 있으면 그 줄을 우선 분리 단서로 쓴다. */
 function splitMeaningUnits(text) {
-  const normalized = text.replace(/\n+/g, ' ').trim();
-  if (!normalized) return [];
-
-  // 문장 경계로 우선 나눈다
-  let parts = normalized.split(/(?<=[.?!])\s+/).filter(Boolean);
-  if (parts.length === 0) parts = [normalized];
+  const raw = text;
+  const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (lines.length === 0) return [];
 
   const out = [];
-  for (const part of parts) {
-    // 접속 connective로 절 분할: 과거/완료 + 고 (았/었/였/겠 + 고)
-    const clauses = part.split(/(?<=[았었였겠]고)\s+/).filter(Boolean);
-    for (const c of clauses) {
-      const cleaned = cleanClauseEnding(c.trim());
-      if (cleaned) out.push(cleaned);
+  for (const line of lines) {
+    if (!line) continue;
+    const normalized = line.replace(/\n+/g, ' ').trim();
+    if (!normalized) continue;
+
+    let parts = normalized.split(/(?<=[.?!])\s+/).filter(Boolean);
+    if (parts.length === 0) parts = [normalized];
+
+    for (const part of parts) {
+      const clauses = part.split(/(?<=[았었였겠]고)\s+/).filter(Boolean);
+      for (const c of clauses) {
+        const cleaned = cleanClauseEnding(c.trim());
+        if (cleaned) out.push(cleaned);
+      }
     }
   }
   return out;
