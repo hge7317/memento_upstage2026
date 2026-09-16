@@ -87,7 +87,7 @@ export default function RecallSteps({ session, setSession }) {
     (async () => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+        const timeout = setTimeout(() => controller.abort(), 30000);
 
         const body = JSON.stringify({
           sessionId: session?.sessionId,
@@ -165,7 +165,7 @@ export default function RecallSteps({ session, setSession }) {
     setLoading(true);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
+      const timeout = setTimeout(() => controller.abort(), 30000);
 
       const body = JSON.stringify({
         sessionId: session?.sessionId,
