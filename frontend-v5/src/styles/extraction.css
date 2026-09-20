@@ -1,0 +1,220 @@
+/* ===== S03 후보 추출 ===== */
+.extract__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 26px 30px;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.screen--white {
+  background-color: var(--page-bg);
+}
+
+.extract__sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.extract__neuron-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.extract__dot {
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.extract__dot--coral {
+  width: 11px;
+  height: 11px;
+  background: var(--landing-coral);
+}
+
+.extract__dot--cyan {
+  width: 11px;
+  height: 11px;
+  background: var(--landing-cyan);
+}
+
+.extract__line {
+  display: inline-block;
+  width: 12px;
+  height: 0;
+  border-top: 1px solid var(--memo-line-3);
+}
+
+.extract__brand {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.save-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  background: var(--bg-chip);
+  border: 1px solid var(--bg-chip);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-teal);
+  margin-left: auto;
+}
+
+.extract__title {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.extract__sub {
+  margin: 0 0 30px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.extract__progress-dots {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 40px;
+}
+
+.extract__connector {
+  display: inline-block;
+  width: 105px;
+  height: 0;
+  border-top: 1px solid var(--extract-connector);
+}
+
+.extract__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.extract__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 22px 0;
+  position: relative;
+}
+
+.extract__step + .extract__step::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--extract-divider);
+}
+
+.extract__step-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-teal);
+  flex-shrink: 0;
+  width: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.extract__step-num--done {
+  color: var(--accent-teal);
+}
+
+.extract__step-num--idle {
+  color: var(--extract-step-idle);
+}
+
+.extract__step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.extract__step-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.extract__step-desc {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.extract__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.extract__chip--done {
+  background: var(--bg-chip);
+  border: 1px solid var(--bg-chip);
+  color: var(--accent-teal);
+}
+
+.extract__chip--progress {
+  background: var(--extract-progress-bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.extract__progress {
+  margin-top: 28px;
+}
+
+.extract__progress-bg {
+  width: 100%;
+  height: 6px;
+  background: var(--extract-bar-bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.extract__progress-fill {
+  width: 72%;
+  height: 6px;
+  background: var(--extract-bar-fill);
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
+.extract__notice {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.memo__complete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,154 @@
+/* ===== 로그인 ===== */
+.screen.screen--dark.login-screen {
+  background: linear-gradient(135deg, var(--auth-navy-1), var(--auth-navy-2), var(--auth-navy-3));
+  color: var(--auth-cream);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-screen .header {
+  background: var(--auth-navy-1);
+  border-bottom-color: var(--auth-navy-edge);
+  justify-content: space-between;
+  padding: 14px 22px;
+}
+
+.login_screen__header-logo {
+  color: var(--auth-cream);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.login_screen__header-meta {
+  font-weight: 400;
+  font-size: 7.5px;
+  color: var(--auth-footer-muted);
+  letter-spacing: 0.06em;
+}
+
+.login__card {
+  margin: auto;
+  width: 100%;
+  max-width: 560px;
+  padding: 30px 28px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.login__neuron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 6px;
+}
+
+.login__neuron-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid;
+}
+
+.login__neuron-dot--coral {
+  background: var(--auth-coral);
+  border-color: var(--auth-coral);
+  animation: login-neuron-pulse 3s ease-in-out infinite;
+}
+
+.login__neuron-dot--cyan {
+  background: var(--auth-cyan);
+  border-color: var(--auth-cyan);
+  animation: login-neuron-pulse 3s ease-in-out infinite;
+}
+
+.login__neuron-line {
+  width: 13px;
+  height: 0;
+  border-top: 1px solid var(--auth-divider);
+}
+
+.login__brand {
+  font-weight: 700;
+  font-size: 10.5px;
+  color: var(--auth-navy-ink);
+  letter-spacing: 0.04em;
+  background: #ffffff;
+  padding: 0 2px;
+}
+
+.login__title {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--auth-navy-ink);
+  letter-spacing: -0.01em;
+  margin: 6px 0 8px;
+}
+
+.login__sub {
+  font-weight: 400;
+  font-size: 9.8px;
+  color: var(--auth-brand-sub);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.login__sub--hint {
+  color: #B23B3B;
+  margin: 0 0 10px;
+}
+
+.login__submit {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.login__links {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 9px;
+  color: var(--auth-brand-sub);
+  font-weight: 700;
+}
+
+.login__dot {
+  color: var(--auth-divider);
+  margin: 0 2px;
+}
+
+.login__link {
+  background: transparent;
+  border: none;
+  color: var(--auth-brand-sub);
+  font-weight: 700;
+  font-size: 9px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.login__error {
+  margin-top: 14px;
+  font-size: 9.8px;
+  color: var(--auth-error-border);
+  text-align: left;
+  background: #fff;
+  padding: 8px 10px;
+  border: 1px solid var(--auth-error-border);
+  border-radius: 8px;
+}
+
+@keyframes login-neuron-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50%      { transform: scale(1.12); opacity: 1; }
+}
+
+.login__submit:disabled {
+  opacity: 0.85;
+}

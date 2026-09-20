@@ -47,6 +47,6 @@
 - 문서에 반영이 필요한가
 
 ## 7. 문서 규칙
-- PRD 기준 문서는 `docs/PRD_v0.2.md`다.
+- PRD 기준 문서는 `Memory-Replay_Development_PRD_v0.4.md`다.
 - UX 문구, 상태 모델, 질문 정책, 결과 구조 변경은 PRD와 맞춘다.
 - 기능 변경 시 관련 절을 함께 수정한다.
