@@ -2,67 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
-const STEPS = [
-  {
-    id: "context-reinstatement",
-    tag: "STEP 1 · 사건 직전 맥락",
-    count: "회상 1 / 4",
-    question: "면접이 시작되기 직전, 어떤 상황이었는지 떠오르는 대로 말해주세요.",
-    placeholder: "기억나는 내용을 자유롭게 입력하세요",
-    fallback: "면접이 시작되기 직전, 어떤 상황이었는지 떠오르는 대로 말해주세요.",
-  },
-  {
-    id: "free-recall",
-    tag: "STEP 2 · 자유 서술",
-    count: "회상 2 / 4",
-    question: "순서를 맞추려고 하지 말고, 지금 떠오르는 질문이나 장면을 자유롭게 말해주세요.",
-    placeholder: "순서와 관계없이 떠오르는 내용을 적어주세요",
-    fallback: "순서를 맞추려고 하지 말고, 지금 떠오르는 질문이나 장면을 자유롭게 말해주세요.",
-  },
-  {
-    id: "structural-cue",
-    tag: "STEP 3 · 시간·공간·감각·행동 단서",
-    count: "회상 3 / 4",
-    question: "그다음에 기억나는 장면이나 행동이 있나요?",
-    placeholder: "단서를 따라 떠오르는 내용을 입력하세요",
-    fallback: "그다음에 기억나는 장면이나 행동이 있나요?",
-  },
-  {
-    id: "reverse-recall",
-    tag: "STEP 4 · 마지막 순간부터 역순 회상",
-    count: "회상 4 / 4",
-    question: "면접이 끝나기 직전의 마지막 장면부터 거꾸로 떠올려볼게요. 가장 마지막에 누가 무엇을 했나요?",
-    placeholder: "마지막에서 앞으로 거꾸로 떠올려보세요",
-    fallback: "면접이 끝나기 직전의 마지막 장면부터 거꾸로 떠올려볼게요. 가장 마지막에 누가 무엇을 했나요?",
-  },
-];
-
-function confirmedItems(session) {
-  if (!Array.isArray(session?.candidates)) return [];
-  return session.candidates
-    .filter((c) => c && (c.status === "CONFIRMED" || c.status === "EDITED" || c.status === "UNKNOWN"))
-    .map((c) => (c.status === "EDITED" && c.editedClaim ? c.editedClaim : c.claim))
-    .filter(Boolean);
-}
-
-function rejectedItems(session) {
-  if (!Array.isArray(session?.candidates)) return [];
-  return session.candidates
-    .filter((c) => c && c.status === "REJECTED" && c.claim)
-    .map((c) => c.claim);
-}
-
-function previousUserMessage(messages, stepId) {
-  const stepMessages = messages[stepId] || [];
-  const userMessages = stepMessages.filter((m) => m && m.role === "user");
-  if (userMessages.length === 0) return "";
-  return userMessages[userMessages.length - 1].text;
-}
-
-function totalUserMessages(messages, stepId) {
-  const stepMessages = messages[stepId] || [];
-  return stepMessages.filter((m) => m && m.role === "user").length;
-}
+import { STEPS, confirmedItems, rejectedItems, previousUserMessage } from "../lib/recall.js";
+import { postJson } from "../lib/api.js";
 
 export default function RecallSteps({ session, setSession }) {
   const navigate = useNavigate();
@@ -86,10 +27,7 @@ export default function RecallSteps({ session, setSession }) {
 
     (async () => {
       try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-
-        const body = JSON.stringify({
+        const body = {
           sessionId: session?.sessionId,
           contextType: current.id,
           context: {
@@ -113,18 +51,9 @@ export default function RecallSteps({ session, setSession }) {
               text: m.text,
             })),
           },
-        });
+        };
 
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || "https://memento-upstage2026.vercel.app"}/api/recall`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await postJson("/api/recall", body);
         if (!cancelled && typeof data.question === "string" && data.question.trim()) {
           addAiMessage(data.question.trim());
         } else if (!cancelled) {
@@ -172,10 +101,7 @@ export default function RecallSteps({ session, setSession }) {
   async function fetchNext(questionText) {
     setLoading(true);
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-
-      const body = JSON.stringify({
+      const body = {
         sessionId: session?.sessionId,
         contextType: current.id,
         context: {
@@ -202,18 +128,9 @@ export default function RecallSteps({ session, setSession }) {
             : []),
           ].slice(-8),
         },
-      });
+      };
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || "https://memento-upstage2026.vercel.app"}/api/recall`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await postJson("/api/recall", body);
       if (typeof data.question === "string" && data.question.trim()) {
         appendMessage("ai", data.question.trim());
       } else {
@@ -267,7 +184,6 @@ export default function RecallSteps({ session, setSession }) {
     }
   }
 
-  const answersRef = { current: {} };
 
   return (
     <div className="screen screen--white recall">

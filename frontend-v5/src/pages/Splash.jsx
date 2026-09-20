@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
-import "../App.css";
 
 /* ---------- 뉴런 애니메이션: 일시정지/재생 토글 ---------- */
 const NEURON_KEYFRAMES = `

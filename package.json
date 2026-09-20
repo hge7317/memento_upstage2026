@@ -1,0 +1,14 @@
+{
+  "name": "memento",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npm --prefix frontend-v5 run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build": "npm --prefix frontend-v5 run build",
+    "test": "npm --prefix backend test && npm --prefix frontend-v5 test",
+    "preview": "npm --prefix frontend-v5 run preview"
+  }
+}

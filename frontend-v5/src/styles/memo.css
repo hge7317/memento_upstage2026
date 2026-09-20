@@ -1,0 +1,233 @@
+/* ===== S02 빠른 메모 ===== */
+.memo__body {
+  flex: 1;
+  padding: 14px 22px 28px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.memo__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.memo__title {
+  font-weight: 700;
+  font-size: 18.75pt;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.memo__sub {
+  margin: 0 0 16px;
+  font-weight: 400;
+  font-size: 9.75pt;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.memo__info-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-chip);
+  border: 1px solid var(--bg-chip);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.memo__company {
+  font-weight: 700;
+  font-size: 10.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.memo__context {
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memo__posting-chip {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 3px 10px;
+  background: #ffffff;
+  border: 1px solid var(--bg-chip);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 9pt;
+  color: var(--accent-teal);
+  white-space: nowrap;
+}
+
+.memo__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.memo__textarea-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memo__textarea {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  max-height: 340px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 10.5px;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+}
+
+.memo__textarea::placeholder {
+  color: var(--pi02-soft-gray);
+}
+
+.memo__count {
+  font-weight: 400;
+  font-size: 8.25pt;
+  color: var(--muted);
+  text-align: right;
+}
+
+.memo__photo-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.memo__photo-title {
+  font-weight: 700;
+  font-size: 11.25pt;
+  color: var(--ink-2);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.memo__photo-sub {
+  font-weight: 400;
+  font-size: 8.25pt;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.memo__photo-limit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  background: var(--bg-chip);
+  border: 1px solid var(--bg-chip);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 9pt;
+  color: var(--accent-teal);
+  align-self: center;
+  margin-bottom: 12px;
+}
+
+.memo__photo-btn {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+  padding: 9px 16px;
+  background: #ffffff;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 10.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.memo__photo-btn:hover {
+  opacity: 0.88;
+}
+
+.memo__notice {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: var(--bg-chip);
+  border: 1px solid var(--bg-chip);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 9pt;
+  color: var(--accent-teal);
+  line-height: 1.5;
+}
+
+.memo__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.memo__save-btn {
+  padding: 9px 16px;
+  background: #ffffff;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 10.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.memo__save-btn:hover {
+  opacity: 0.88;
+}
+
+.memo__complete-btn {
+  padding: 9px 16px;
+  background: var(--accent-teal);
+  color: #ffffff;
+  border: 1px solid var(--accent-teal);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 10.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.memo__complete-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}

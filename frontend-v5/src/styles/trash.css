@@ -1,0 +1,102 @@
+/* ===== 휴지통 ===== */
+.trash {
+  padding: 26px 22px 80px;
+}
+
+.trash__header {
+  margin-bottom: 18px;
+}
+
+.trash__title {
+  font-weight: 700;
+  font-size: 18.8px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.trash__sub {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.trash__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.trash__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.trash__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trash__item-company {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.trash__item-role {
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.trash__item-date {
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.trash__item-badge {
+  padding: 4px 10px;
+  background: var(--bg-warm);
+  color: var(--accent-warm);
+  font-weight: 700;
+  font-size: 9px;
+  border-radius: 4px;
+}
+
+.trash__restore-btn {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: var(--ink-2);
+  font-weight: 700;
+  font-size: 10.5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.trash__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trash__footer-btn {
+  padding: 9px 18px;
+  background: #ffffff;
+  color: var(--ink-2);
+  font-weight: 700;
+  font-size: 10.5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}

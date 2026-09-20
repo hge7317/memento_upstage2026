@@ -1,0 +1,226 @@
+/* ===== 결과 문서 ===== */
+.result-doc {
+  padding: 26px 22px 80px;
+}
+
+.result-doc__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.result-doc__title {
+  font-weight: 700;
+  font-size: 17.2px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.result-doc__meta {
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.result-doc__notice {
+  padding: 12px 14px;
+  background: var(--bg-warm);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 9.8px;
+  color: var(--accent-warm);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.result-doc__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+
+.result-doc__tab {
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 9px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.result-doc__tab--active {
+  color: var(--accent-teal);
+  border-bottom-color: var(--accent-teal);
+}
+
+.result-doc__body {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.result-doc__main {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 240px;
+}
+
+.result-doc__section-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+
+.result-doc__list {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.result-doc__list-item {
+  margin-bottom: 6px;
+}
+
+.result-doc__empty {
+  font-weight: 400;
+  font-size: 11.2px;
+  color: var(--muted);
+  padding: 30px 0;
+  text-align: center;
+}
+
+.result-doc__timeline-item {
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.result-doc__timeline-item:last-child {
+  border-bottom: none;
+}
+
+.result-doc__timeline-time {
+  font-weight: 700;
+  font-size: 9px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.result-doc__timeline-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 9px;
+  color: var(--accent-teal);
+  background: var(--bg-chip);
+  margin-bottom: 6px;
+}
+
+.result-doc__timeline-content {
+  font-weight: 400;
+  font-size: 11.2px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.result-doc__timeline-edit-input {
+  width: 100%;
+  border: 1px solid var(--accent-teal);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 11.2px;
+  color: var(--ink-2);
+  background: #ffffff;
+  outline: none;
+}
+
+.result-doc__edit-btn {
+  margin-top: 8px;
+  background: transparent;
+  color: var(--accent-teal);
+  font-weight: 700;
+  font-size: 8.2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.result-doc__sidebar {
+  width: 220px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.result-doc__sidebar-title {
+  font-weight: 700;
+  font-size: 11.2px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+
+.result-doc__info-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 400;
+  font-size: 9px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.result-doc__info-value {
+  font-weight: 700;
+  font-size: 12.8px;
+  color: var(--ink);
+}
+
+.result-doc__footer {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  gap: 10px;
+}
+
+.result-doc__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10.5px;
+  padding: 9px 16px;
+}
+
+.result-doc__btn--primary {
+  background: var(--accent-teal);
+  color: #ffffff;
+}
+
+.result-doc__btn--secondary {
+  background: #ffffff;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+}
+
+.result-doc__btn--danger-outline {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}

@@ -1,0 +1,202 @@
+/* ===== S05 검증완료 ===== */
+.done__page {
+  flex: 1;
+  padding: 20px 26px 120px;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+}
+.done__inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+.done__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.done__brand {
+  font-weight: 700;
+  font-size: 10.5pt;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.done__save-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 5px 14px;
+  background: var(--bg-chip);
+  color: var(--accent-teal);
+  font-weight: 700;
+  font-size: 9pt;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+.done__title {
+  margin: 0 0 8px;
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.done__sub {
+  margin: 0 0 22px;
+  font-size: 9.75pt;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.done__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--bg-chip);
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+.done__info-left {
+  min-width: 0;
+}
+.done__company {
+  font-weight: 700;
+  font-size: 10.5pt;
+  color: var(--ink);
+}
+.done__info-meta {
+  font-size: 8.25pt;
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.done__posting {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  background: var(--page-bg);
+  color: var(--accent-teal);
+  border: 1px solid var(--page-bg);
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 9pt;
+  cursor: pointer;
+}
+.done__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.done__card {
+  border-radius: 12px;
+  padding: 14px 12px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.done__card-label {
+  font-size: 8.25pt;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.done__card-num {
+  font-size: 18pt;
+  font-weight: 700;
+}
+.done__detail {
+  background: var(--page-bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  margin-bottom: 22px;
+}
+.done__detail-title {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+.done__detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.done__detail-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.done__detail-badge {
+  flex: 0 0 auto;
+}
+.done__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 9pt;
+}
+.done__badge--fact {
+  background: var(--bg-chip);
+  color: var(--accent-teal);
+}
+.done__badge--uncertain {
+  background: var(--bg-warm);
+  color: var(--accent-warm);
+}
+.done__badge--eval {
+  background: var(--bg-chip);
+  color: var(--accent-teal);
+}
+.done__badge--edit {
+  background: var(--done-edit-bg);
+  color: var(--done-edit-ink);
+}
+.done__badge--excl {
+  background: var(--done-exclude-bg);
+  color: var(--done-exclude-ink);
+}
+.done__detail-text {
+  flex: 1;
+  font-size: 9pt;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.done__detail-empty {
+  font-size: 9pt;
+  color: var(--muted);
+  padding: 8px 0;
+}
+.done__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+.done__btn {
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 10.5pt;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.done__btn--ghost {
+  background: var(--page-bg);
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+.done__btn--primary {
+  background: var(--accent-teal);
+  color: var(--page-bg);
+}
+.done__btn--primary:hover {
+  opacity: 0.92;
+}

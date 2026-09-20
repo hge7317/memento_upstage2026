@@ -1,49 +1,61 @@
-# Memory Replay
+# Memento · Memory Replay
 
-녹취 없는 사건 직후, 사용자의 기억을 AI가 대신 만들지 않고 단계적으로 인출해 복기노트·인출 카드·재연습 일정으로 만드는 회상 무결성 에이전트 서비스.
+면접 직후의 기억을 입력하고 후보 확인·회상·타임라인 검토를 거쳐 복기 기록으로 정리하는 웹 앱입니다.
 
-- PRD: [docs/PRD_v0.4.md](docs/PRD_v0.4.md)
-- 현재 제공 상황: 면접 복기 (v0.4.0-dev)
-- 우선 제공: 면접 직후 복기
+## 구조
 
-## 팀 규칙
+- `frontend-v5/`: React + Vite 프론트엔드. 배포 루트 이름을 유지합니다.
+- `backend/`: Express API와 Solar 호출. 로컬 서버와 Vercel 진입점을 분리합니다.
+- `docs/references/`, `docs/backend/`: 회상 안전 규칙과 설계 명세.
+- `memory_replay_skill/memory-replay-dev/`: 회상 스킬 원본 한 벌.
+- `docs/archive/`: 이전 구현·프롬프트·설계 이력. 현재 구현 상태를 설명하는 문서가 아닙니다.
 
-- 브랜치: `main` 보호, 기능별 `feat/`, 버그 `fix/`, 문서 `docs/`
-- 커밋: [Conventional Commits](docs/team-rules.md#commit)
-- PR: 템플릿 작성 후 리뷰 1인 이상 승인
-- 코드 리뷰 체크리스트: [docs/review-checklist.md](docs/review-checklist.md)
-- 라벨: `p0`, `feat`, `bug`, `docs` 등
+제품 명세는 [PRD](Memory-Replay_Development_PRD_v0.4.md), 협업 규칙은 [GitHub 팀 규칙](docs/GITHUB_TEAM_RULES.md), 검토 항목은 [리뷰 체크리스트](docs/guides/REVIEW_CHECKLIST.md)를 참고합니다. 명세의 모든 기능이 구현된 것은 아닙니다.
 
-## 개발 우선순위
+## 로컬 실행
 
-- P0: 스플래시, 상황 탭, 빠른 메모, 후보 추출, O/X 검증, 면접 Step1/Step2, 면접 Markdown 결과
-- P1: 분실물/미팅 플로우, PDF 결과, 모바일 최적화, 오류 복구·삭제·품질 로그
-- P2: 음성 입력, D+1 추가 회상, 발표·심사 탭, 상황 탭 원격 설정
+Node.js 20 이상이 필요합니다. 프로젝트 루트에서 의존성을 각각 설치합니다.
 
-## 저장소 구조
-
-```text
-frontend/     # 웹 UI, 상태 관리, 로컬 저장 유틸리티
-backend/      # 목업 데이터, API 인터페이스 초안
-docs/         # PRD, 팀 규칙, 상태 모델, UX 문구, QA
-```
-frontend/
-backend/
-docs/
-.github/
-scripts/
+```sh
+npm --prefix frontend-v5 ci
+npm --prefix backend ci
+cp frontend-v5/.env.example frontend-v5/.env.local
+cp backend/.env.example backend/.env
 ```
 
-## 시작하기
+`backend/.env`의 `SOLAR_API_KEY`를 설정합니다. 키는 서버에만 보관합니다. 터미널 두 개에서 각각 실행합니다.
 
-```bash
-git clone https://github.com/hge7317/memento_upstage2026.git
-cd memento_upstage2026/frontend
-npm install
+```sh
+# 터미널 1: 프로젝트 루트
 npm run dev
+
+# 터미널 2
+cd backend
+node --env-file=.env src/server.js
 ```
 
-## Solar 연동 메모
+프론트엔드는 `http://localhost:3005`, 백엔드는 `http://localhost:3001`입니다. `npm run dev:backend`는 이미 셸에 설정된 환경 변수를 사용하며 `.env`를 자동으로 읽지 않습니다.
 
-- Solar Pro 4 호출은 백엔드 이슈로 분리한다.
-- 초기 단계는 프론트 상태 머신 + 목업 응답으로 진행한다.
+`VITE_API_BASE`를 생략하면 기존 배포 API 주소를 사용합니다. 로컬 백엔드 검증 시 `.env.local`을 설정하고 프론트엔드를 재시작하세요. Vite 환경 변수는 빌드 시 반영됩니다.
+
+## 검증
+
+```sh
+npm test
+npm run build
+npm run preview -- --port 3005
+```
+
+테스트는 외부 Solar API 호출 없이 계약·오류 처리·기록 상태를 검증합니다. 빌드 성공과 실제 Solar 응답 또는 전체 브라우저 동작 검증은 별개입니다.
+
+## 현재 구현의 한계
+
+- 로그인은 데모 흐름이며 인증·DB 저장은 구현되지 않았습니다.
+- 기록은 브라우저 실행 중 메모리에 보관됩니다. 새로고침하면 입력 기록이 사라지고 예시 기록이 다시 생성됩니다.
+- 삭제는 휴지통 이동이며 영구 삭제·30일 자동 만료는 구현되지 않았습니다.
+- 후보 추출은 로컬 규칙 기반입니다. 회상 질문과 공고 분석은 Solar API를 사용합니다.
+- 회상 API 실패 시 정적 질문으로 대체되는 기존 동작이 있습니다.
+- 타임라인에는 후보 순서로 계산하는 예시 시각이 남아 있습니다. 실제 사건 시각으로 신뢰하면 안 됩니다.
+- 문서 생성 대기 화면은 타이머 기반이며 PDF 생성·서버 저장을 뜻하지 않습니다.
+
+2026-09-17 정리 범위와 검증 기록은 [정리 보고서](docs/CLEANUP_20260917.md)를 참고하세요.

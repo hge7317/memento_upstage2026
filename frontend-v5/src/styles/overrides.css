@@ -1,0 +1,94 @@
+/* ===== S13 복기 결과 생성 ===== */
+.generate { display: flex; flex-direction: column; min-height: 100vh; }
+.generate__body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 52px; }
+.generate__card { width: 789px; max-width: 100%; min-height: 511px; box-sizing: border-box; padding: 61px 55px 0; display: flex; flex-direction: column; align-items: center; background: var(--page-bg); border: 1px solid var(--line); border-radius: 28px; }
+.generate__icon { width: 167px; height: 167px; border-radius: 50%; background: var(--verify-fact-bg); color: var(--accent-teal); font-size: 33px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.generate__title { margin: 24px 0 0; font-size: 34px; font-weight: 700; color: var(--ink); text-align: center; }
+.generate__sub { margin: 11px 0 0; max-width: 616px; font-size: 22px; line-height: 1.6; color: var(--muted); text-align: center; }
+.generate__bar { width: 523px; max-width: 100%; height: 12px; margin-top: 31px; border-radius: 6px; background: var(--generate-bar-bg); overflow: hidden; }
+.generate__bar-fill { height: 100%; border-radius: 6px; background: var(--recall-bar-fill); transition: width .4s ease; }
+.generate__status { margin: 19px 0 0; font-size: 19px; color: var(--muted); text-align: center; }
+
+/* ===== S14 복기 결과 ===== */
+.result { display: flex; flex-direction: column; min-height: 100vh; }
+.result__body { flex: 1; display: flex; flex-direction: column; padding: 38px 88px 40px 52px; }
+.result__title { margin: 0; font-size: 36px; font-weight: 700; color: var(--ink); }
+.result__meta { margin: 4px 0 0; font-size: 19px; color: var(--muted); }
+.result__notice { margin-top: 19px; min-height: 74px; box-sizing: border-box; padding: 12px 28px; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--bg-warm); border-radius: 12px; font-size: 20px; font-weight: 700; color: var(--accent-warm); }
+.result__tabs { display: flex; gap: 18px; margin-top: 25px; }
+.result__tab { width: 214px; height: 40px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg-soft); color: var(--muted); font-size: 19px; font-weight: 700; cursor: pointer; }
+.result__tab--active { background: var(--verify-fact-bg); border-color: var(--verify-fact-bg); color: var(--accent-teal); }
+.result__grid { display: grid; grid-template-columns: 1fr 341px; gap: 31px; margin-top: 25px; }
+.result__panel { min-height: 347px; max-height: 347px; overflow-y: auto; box-sizing: border-box; padding: 19px 28px 24px; background: var(--page-bg); border: 1px solid var(--line); border-radius: 15px; }
+.result__panel-title { margin: 0 0 12px; font-size: 25px; font-weight: 700; color: var(--ink-2); }
+.result__bullets { margin: 0; padding-left: 20px; font-size: 22px; line-height: 1.7; color: var(--ink-2); }
+.result__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.result__list-item { display: flex; align-items: center; gap: 14px; font-size: 20px; color: var(--ink-2); }
+.result__time { flex-shrink: 0; width: 64px; font-weight: 700; color: var(--muted); font-size: 19px; }
+.result__tag { flex-shrink: 0; min-width: 120px; height: 34px; padding: 0 14px; box-sizing: border-box; border-radius: 17px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
+.result__tag--fact { background: var(--verify-fact-bg); color: var(--accent-teal); }
+.result__tag--uncertain { background: var(--bg-warm); color: var(--accent-warm); }
+.result__tag--evaluation { background: var(--done-edit-bg); color: var(--done-edit-ink); }
+.result__text { flex: 1; line-height: 1.4; }
+.result__qa { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.result__qa:last-child { border-bottom: 0; }
+.result__qa-step { font-size: 17px; font-weight: 700; color: var(--accent-teal); }
+.result__qa-answer { margin-top: 4px; font-size: 20px; line-height: 1.5; color: var(--ink-2); white-space: pre-wrap; }
+.result__info { min-height: 347px; box-sizing: border-box; padding: 19px 28px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 15px; }
+.result__info-title { margin: 0 0 22px; font-size: 23px; font-weight: 700; color: var(--ink-2); }
+.result__info-row { display: flex; justify-content: space-between; align-items: center; height: 46px; margin-bottom: 22px; }
+.result__info-label { font-size: 19px; color: var(--muted); }
+.result__info-value { font-size: 26px; font-weight: 700; color: var(--ink); }
+.result__actions { display: flex; justify-content: flex-end; gap: 19px; margin-top: 28px; }
+.result__btn { height: 62px; padding: 0 32px; border-radius: 16px; font-size: 22px; font-weight: 700; cursor: pointer; }
+.result__btn--delete { min-width: 111px; background: var(--done-exclude-bg); border: 1px solid var(--done-exclude-ink); color: var(--done-exclude-ink); }
+.result__btn--edit { min-width: 170px; background: var(--page-bg); border: 1px solid var(--line); color: var(--ink-2); }
+.result__btn--save { min-width: 198px; background: var(--accent-teal); border: 1px solid var(--accent-teal); color: var(--page-bg); }
+.recall__actions .btn:disabled { opacity: .5; }
+
+/* ===== S15 아카이브 ===== */
+.archive { display: flex; flex-direction: column; min-height: 100vh; }
+.archive__body { flex: 1; display: flex; flex-direction: column; padding: 38px 88px 40px 52px; }
+.archive__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.archive__title { margin: 0; font-size: 39px; font-weight: 700; color: var(--ink); }
+.archive__sub { margin: 0; font-size: 22px; color: var(--muted); }
+.archive__search { width: 452px; max-width: 100%; height: 62px; box-sizing: border-box; padding: 0 22px; border: 1px solid var(--line); border-radius: 14px; background: var(--page-bg); font-size: 19px; color: var(--ink-2); font-family: inherit; outline: 0; }
+.archive__search::placeholder { color: var(--archive-placeholder); }
+.archive__toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 19px; margin-top: 16px; }
+.archive__trash-btn { height: 46px; padding: 0 28px; border-radius: 15px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 22px; font-weight: 700; cursor: pointer; }
+.archive__sort-btn { height: 40px; padding: 0 24px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg-soft); color: var(--muted); font-size: 19px; font-weight: 700; cursor: pointer; }
+.archive__list { display: flex; flex-direction: column; gap: 32px; margin-top: 12px; }
+.archive__card { display: grid; grid-template-columns: 1fr 183px 121px 90px; align-items: center; column-gap: 12px; min-height: 136px; box-sizing: border-box; padding: 19px 15px 19px 31px; background: var(--page-bg); border: 1px solid var(--line); border-radius: 15px; }
+.archive__company { font-size: 25px; font-weight: 700; color: var(--ink-2); }
+.archive__role { margin-top: 6px; font-size: 19px; color: var(--muted); }
+.archive__date { font-size: 19px; color: var(--muted); text-align: center; }
+.archive__open { height: 59px; border-radius: 16px; border: 0; background: var(--accent-teal); color: var(--page-bg); font-size: 22px; font-weight: 700; cursor: pointer; }
+.archive__delete { height: 46px; border: 0; background: transparent; color: var(--done-exclude-ink); font-size: 17px; font-weight: 700; cursor: pointer; }
+.archive__empty { padding: 60px 0; text-align: center; font-size: 22px; color: var(--muted); }
+
+/* ===== S16 휴지통 ===== */
+.bin { display: flex; flex-direction: column; min-height: 100vh; }
+.bin__body { flex: 1; display: flex; flex-direction: column; padding: 38px 88px 40px 52px; }
+.bin__title { margin: 0; font-size: 39px; font-weight: 700; color: var(--ink); }
+.bin__sub { margin: 0 0 42px; font-size: 22px; color: var(--muted); }
+.bin__list { display: flex; flex-direction: column; gap: 32px; }
+.bin__card { display: grid; grid-template-columns: 1fr 294px 183px 121px; align-items: center; column-gap: 28px; min-height: 136px; box-sizing: border-box; padding: 19px 31px; background: var(--page-bg); border: 1px solid var(--line); border-radius: 15px; }
+.bin__company { font-size: 25px; font-weight: 700; color: var(--ink-2); }
+.bin__role { margin-top: 6px; font-size: 19px; color: var(--muted); }
+.bin__days { height: 40px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-warm); color: var(--accent-warm); font-size: 19px; font-weight: 700; }
+.bin__date { font-size: 19px; color: var(--muted); text-align: center; }
+.bin__restore { height: 59px; border-radius: 16px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 22px; font-weight: 700; cursor: pointer; }
+.bin__empty { padding: 60px 0; text-align: center; font-size: 22px; color: var(--muted); }
+.bin__actions { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 32px; }
+.bin__back { width: 241px; height: 65px; border-radius: 15px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 22px; font-weight: 700; cursor: pointer; }
+
+/* ===== S02 빠른 메모 — 메모 박스/사진 패널 겹침 보정 ===== */
+.memo__grid { display: grid; grid-template-columns: 864fr 406fr; column-gap: 31px; align-items: stretch; margin-bottom: 25px; }
+.memo__textarea-wrap { position: relative; min-width: 0; display: block; height: 294px; }
+.memo__textarea { box-sizing: border-box; width: 100%; height: 294px; max-height: none; padding: 20px 24px 44px; border: 1px solid var(--line); border-radius: 19px; font-size: 20px; line-height: 1.5; resize: none; }
+.memo__count { position: absolute; right: 24px; bottom: 16px; font-size: 17px; color: var(--muted); }
+.memo__photo-panel { box-sizing: border-box; min-width: 0; width: 100%; height: 294px; padding: 40px 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 19px; }
+.memo__photo-title { font-size: 20px; font-weight: 700; color: var(--ink-2); margin: 0 0 8px; white-space: nowrap; }
+.memo__photo-sub { font-size: 15px; color: var(--muted); margin: 0 0 10px; }
+.memo__photo-limit { height: 40px; padding: 0 24px; border-radius: 20px; background: var(--bg-chip); color: var(--accent-teal); font-size: 19px; font-weight: 700; display: inline-flex; align-items: center; margin: 0 0 12px; }
+.memo__photo-btn { width: 200px; height: 46px; border-radius: 16px; border: 1px solid var(--line); background: var(--page-bg); color: var(--ink-2); font-size: 20px; font-weight: 700; cursor: pointer; }

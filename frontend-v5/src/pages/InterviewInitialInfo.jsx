@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
+import { postJson } from "../lib/api.js";
 
 const InterviewInitialInfo = ({ session, setSession }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const editData = location.state?.edit;
-  const API_BASE = import.meta.env.VITE_API_BASE || "https://memento-upstage2026.vercel.app";
 
   const [company, setCompany] = useState(editData?.company || session?.company || "");
   const [role, setRole] = useState(editData?.role || session?.role || "");
@@ -24,16 +24,8 @@ const InterviewInitialInfo = ({ session, setSession }) => {
     setLoadingPosting(true);
     setPostingError(false);
     try {
-      const res = await fetch(`${API_BASE}/api/job-posting`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      let data = null;
-      if (res.ok) {
-        try { data = await res.json(); } catch { data = null; }
-      }
-      if (res.ok && data && data.ok === true) {
+      const data = await postJson("/api/job-posting", { url });
+      if (data && data.ok === true) {
         if (!company && data.company) setCompany(data.company);
         if (!role && data.role) setRole(data.role);
         {
